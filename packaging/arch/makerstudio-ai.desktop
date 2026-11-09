@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=MakerStudio AI
+GenericName=Engineering and robotics workshop
+Comment=3D design, circuits, robot faces and robotics, with AI help
+Exec=/usr/bin/makerstudio-ai %f
+Icon=makerstudio-ai
+Terminal=false
+Categories=Development;Engineering;
+Keywords=cad;3d;print;circuit;robot;arduino;esp32;stl;step;
+MimeType=application/x-makerstudio-project;
+StartupWMClass=MakerStudio AI

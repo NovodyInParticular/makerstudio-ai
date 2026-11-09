@@ -1,0 +1,62 @@
+{
+  "name": "makerstudio-ai",
+  "productName": "MakerStudio AI",
+  "version": "0.2.0",
+  "description": "Your AI-powered engineering and robotics workshop.",
+  "author": "NovodyInParticular",
+  "private": true,
+  "main": "dist/main/main.js",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/build.mjs",
+    "start": "npm run build && electron .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:e2e": "npm run build && playwright test",
+    "dist:linux": "npm run build && electron-builder --linux AppImage deb tar.gz",
+    "dist:win": "npm run build && electron-builder --win nsis",
+    "dist:arch": "npm run dist:linux && cd packaging/arch && ./make-pkg.sh"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.6.0",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
+    "avr8js": "0.21.1",
+    "eecircuit-engine": "1.9.0",
+    "fflate": "^0.8.3",
+    "immer": "^11.2.9",
+    "manifold-3d": "^3.5.4",
+    "openai": "7.53.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "replicad": "1.2.1",
+    "replicad-opencascadejs": "1.2.1",
+    "rp2040js": "1.4.1",
+    "three": "^0.187.0",
+    "three-mesh-bvh": "0.9.16",
+    "zod": "^4.6.7",
+    "zustand": "^5.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.187.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0",
+    "esbuild": "^0.28.2",
+    "opentype.js": "^2.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "electron-winstaller@5.4.0": true
+  },
+  "desktopName": "makerstudio-ai.desktop",
+  "homepage": "https://github.com/NovodyInParticular"
+}

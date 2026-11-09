@@ -1,0 +1,38 @@
+appId: ai.makerstudio.desktop
+productName: MakerStudio AI
+copyright: Copyright © 2026 NovodyInParticular
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist/**/*
+  - "!dist/**/*.map"
+  - package.json
+  # Everything the app needs is bundled into dist/ (Vite for the interface, esbuild for main),
+  # so the raw dependency folders (including the 48 MB OpenCascade package) are left out.
+  - "!node_modules/**/*"
+fileAssociations:
+  - ext: msproj
+    name: MakerStudio project
+    description: MakerStudio AI project
+    mimeType: application/x-makerstudio-project
+    role: Editor
+linux:
+  syncDesktopName: true
+  executableName: makerstudio-ai
+  target: [AppImage, deb, tar.gz]
+  category: Development;Engineering;
+  icon: build/icon.png
+  synopsis: AI-powered engineering and robotics workshop
+  maintainer: NovodyInParticular <214131324+NovodyInParticular@users.noreply.github.com>
+deb:
+  depends: [libgtk-3-0, libnss3, libxss1, libxtst6, xdg-utils, libatspi2.0-0, libuuid1, libsecret-1-0]
+win:
+  target: [nsis]
+  icon: build/icon.ico
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  perMachine: false
+artifactName: "${productName}-${version}-${os}-${arch}.${ext}"

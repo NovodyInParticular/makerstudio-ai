@@ -1,0 +1,26 @@
+# Maintainer: NovodyInParticular
+# Packages the prebuilt Linux build (release/*.tar.gz) for Arch / Omarchy.
+pkgname=makerstudio-ai
+pkgver=@VERSION@
+pkgrel=1
+pkgdesc="AI-powered engineering and robotics workshop: 3D design, circuits, robot faces and robotics"
+arch=('x86_64')
+url="https://github.com/NovodyInParticular"
+license=('custom')
+depends=('gtk3' 'nss' 'libxss' 'libxtst' 'xdg-utils' 'at-spi2-core' 'util-linux-libs' 'libsecret')
+optdepends=('platformio-core: compile and upload code to boards, run code in the simulator'
+            'ollama: local AI chat'
+            'bambustudio-bin: open prints in Bambu Studio')
+source=("@TARBALL@")
+sha256sums=('@SHA256@')
+options=('!strip' '!debug')
+
+package() {
+  install -d "$pkgdir/opt/$pkgname"
+  cp -a "$srcdir/@TOPDIR@/." "$pkgdir/opt/$pkgname/"
+  install -d "$pkgdir/usr/bin"
+  ln -s "/opt/$pkgname/makerstudio-ai" "$pkgdir/usr/bin/makerstudio-ai"
+  install -Dm644 "$startdir/makerstudio-ai.desktop" "$pkgdir/usr/share/applications/makerstudio-ai.desktop"
+  install -Dm644 "$startdir/makerstudio-ai.xml" "$pkgdir/usr/share/mime/packages/makerstudio-ai.xml"
+  install -Dm644 "$startdir/icon.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/makerstudio-ai.png"
+}
