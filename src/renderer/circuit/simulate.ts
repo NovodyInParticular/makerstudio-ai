@@ -13,6 +13,7 @@ import { UNO_PINS, type PinReport } from "../../core/circuit/avr";
 import { PICO_GPIO } from "../../core/circuit/pico";
 import type { SpiceResponse } from "./spice.worker";
 import type { AvrIn, AvrOut } from "./avr.worker";
+import { projectStore } from "../state";
 
 let worker: Worker | null = null;
 let nextId = 1;
@@ -159,6 +160,13 @@ export function stopCode() {
   stopWorker();
   useSim.setState({ code: null });
 }
+
+// Another project was opened: the simulation and any running code belonged to the old circuit.
+projectStore.subscribe((state, previous) => {
+  if (state.loads === previous.loads) return;
+  stopCode();
+  useSim.setState({ on: false, running: false, gpio: {}, result: null, build: null, error: null });
+});
 
 export const fmtVolts = (v: number) => `${Math.abs(v) < 0.0005 ? "0.000" : v.toFixed(Math.abs(v) < 10 ? 3 : 2)} V`;
 export const fmtAmps = (a: number) => { const x = Math.abs(a); return x < 1e-6 ? "0 mA" : x < 1e-3 ? `${(a * 1e6).toFixed(0)} µA` : x < 1 ? `${(a * 1e3).toFixed(1)} mA` : `${a.toFixed(2)} A`; };

@@ -8,7 +8,7 @@ import { constants, promises as fs } from "node:fs";
 import path from "node:path";
 import type { SlicerStatus } from "../shared/ipc";
 
-interface Launcher {
+export interface Launcher {
   command: string;
   args: string[];
   label: string;
@@ -44,7 +44,7 @@ async function flatpakInstalled(appId: string): Promise<boolean> {
   return false;
 }
 
-async function findLauncher(): Promise<Launcher | null> {
+export async function findLauncher(): Promise<Launcher | null> {
   const override = process.env.MAKERSTUDIO_SLICER;
   if (override) return (await executable(override)) ? { command: override, args: [], label: override } : null;
 

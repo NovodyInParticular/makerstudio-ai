@@ -19,6 +19,10 @@ export interface Settings {
   ai: ChatSettings;
   /** Size of the whole interface (1 = 100 %), for big or high-resolution screens. */
   uiZoom: number;
+  /** The last choices in the Print panel (Bambu Studio preset names). */
+  slicing: SliceOptions;
+  /** The look of the app: "nova" (bright colours on a space backdrop) or "classic" (the original dark look). */
+  theme: "nova" | "classic";
 }
 
 export interface ChatSettings {
@@ -80,6 +84,83 @@ export interface SlicerStatus {
   location: string | null;
 }
 
+export interface PresetChoice {
+  /** The exact Bambu Studio preset name. */
+  name: string;
+  /** Short name for the list ("0.20mm Standard"). */
+  label: string;
+  /** Filament type for grouping ("PLA", "PETG"). */
+  group?: string;
+}
+
+export interface SlicingCatalog {
+  /** Bambu Studio machine preset, e.g. "Bambu Lab A1 0.4 nozzle". */
+  printer: string;
+  processes: PresetChoice[];
+  filaments: PresetChoice[];
+  plates: PresetChoice[];
+  defaults: { process: string; filament: string; plate: string };
+}
+
+export type SupportMode = "off" | "normal" | "tree";
+
+export interface SliceOptions {
+  process: string;
+  filament: string;
+  plate: string;
+  supports: SupportMode;
+  /** Infill in percent, or null for the quality preset's own value. */
+  infill: number | null;
+}
+
+export interface SliceRequest {
+  /** Used for the file and folder names. */
+  name: string;
+  /** One STL per part. */
+  files: FileData[];
+  options: SliceOptions;
+  /** Pictures of the parts for the printer's screen (PNG). */
+  thumbnails?: { large: Uint8Array; small: Uint8Array };
+}
+
+export interface SlicedPlate {
+  /** The file to put on the SD card. */
+  fileName: string;
+  /** Parts on this plate (their STL names without ".stl"). */
+  parts: string[];
+  seconds: number | null;
+  filamentGrams: number | null;
+  filamentMm: number | null;
+  layers: number | null;
+  maxZ: number | null;
+}
+
+export interface SliceOutcome {
+  /** Refers to this result in later calls (preview, copy, save). */
+  id: string;
+  folder: string;
+  plates: SlicedPlate[];
+  /** Centre of the printer's bed in G-code coordinates (mm). */
+  bedCentre: [number, number];
+  /** How long slicing took, seconds. */
+  took: number;
+  warnings: string[];
+}
+
+export interface RemovableDrive {
+  /** Where the card is mounted (or the drive letter on Windows). */
+  mount: string;
+  label: string;
+  /** File system type as the system reports it ("vfat", "exfat", "FAT32"). */
+  fsType: string;
+  /** True when the printer can read it (FAT32). */
+  printerReadable: boolean;
+  sizeBytes: number | null;
+  freeBytes: number | null;
+  /** Whether MakerStudio can eject it (Linux with udisksctl). */
+  canEject: boolean;
+}
+
 /** One size in a part script's PARAMETERS block (see src/main/scriptRunner.py). */
 export interface ScriptParameter {
   name: string;
@@ -119,8 +200,10 @@ export interface MakerStudioApi {
   saveExportFiles(files: FileData[]): Promise<Result<string | null>>;
   /** Asks for a parent folder and writes a code project into a new subfolder. Returns the new folder, or null if cancelled. */
   exportCodeProject(folderName: string, files: { path: string; text: string }[]): Promise<Result<string | null>>;
-  /** Reads one of the known local model files (see shared/localModels.ts). */
-  readLocalModel(key: string): Promise<Result<FileData>>;
+  /** Reads one of the known local model files or folders (see shared/localModels.ts). */
+  readLocalModel(key: string): Promise<Result<FileData[]>>;
+  /** Downloads (or takes from the cache) one of the known GitHub model sets (see shared/remoteModels.ts). */
+  readRemoteModel(key: string): Promise<Result<FileData[]>>;
   /** Claude Code (MCP) connection status; turning it on/off is done through settings. */
   mcpStatus(): Promise<McpStatus>;
   /** Makes a new connection token (Claude Code must be set up again). */
@@ -166,6 +249,24 @@ export interface MakerStudioApi {
   slicerStatus(): Promise<SlicerStatus>;
   /** Writes the files to a new folder under Exports and opens them in Bambu Studio. Returns the folder. */
   openInSlicer(folderName: string, files: FileData[]): Promise<Result<string>>;
+  /** Quality, filament and plate presets Bambu Studio has for the printer in Settings. */
+  sliceCatalog(): Promise<Result<SlicingCatalog>>;
+  /** Slices the parts with Bambu Studio's slicer (no window). One file per plate. */
+  slice(request: SliceRequest): Promise<Result<SliceOutcome>>;
+  /** Stops the slicing that is running. */
+  cancelSlice(): Promise<void>;
+  /** The G-code of one plate of a slice result, for the preview. */
+  slicedGcode(id: string, plate: number): Promise<Result<Uint8Array>>;
+  /** SD cards and USB sticks that are plugged in. */
+  removableDrives(): Promise<Result<RemovableDrive[]>>;
+  /** Copies one plate's file onto a card. Returns the file's path on the card. */
+  copyToDrive(id: string, plate: number, mount: string): Promise<Result<string>>;
+  /** Safely ejects a card so it can be taken out. */
+  ejectDrive(mount: string): Promise<Result<null>>;
+  /** Asks where to save one plate's sliced file. Returns the path, or null if cancelled. */
+  saveSliced(id: string, plate: number): Promise<Result<string | null>>;
+  /** Opens a sliced plate's file in Bambu Studio (to send it to the printer from there). */
+  openSlicedInBambu(id: string, plate: number): Promise<Result<null>>;
   recentProjects(): Promise<RecentProject[]>;
   forgetRecent(path: string): Promise<void>;
   revealInFolder(path: string): Promise<void>;

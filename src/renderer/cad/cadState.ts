@@ -90,6 +90,14 @@ export const useCad = create<CadUiState>()((set, get) => ({
   requestView: (preset) => set({ viewRequest: { preset, n: ++viewCounter } }),
 }));
 
+// Another project was opened: what was picked, measured or checked belonged to the old one, and
+// the view should show the new project's parts.
+projectStore.subscribe((state, previous) => {
+  if (state.loads === previous.loads) return;
+  useCad.setState({ selection: [], tool: "select", measure: [], workplane: null, printCheck: null });
+  useCad.getState().requestView("home");
+});
+
 export function currentObjects(): CadObject[] {
   return cadObjects(projectStore.getState().project);
 }

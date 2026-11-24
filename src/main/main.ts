@@ -1,15 +1,17 @@
 import { existsSync } from "node:fs";
 // Electron main process: owns the window, the file system and (later) AI provider calls.
 
-import { app, BrowserWindow, dialog, ipcMain, Menu, shell, type MenuItemConstructorOptions } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, Menu, net, shell, type MenuItemConstructorOptions } from "electron";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { FILE_EXTENSION, packProject, ProjectFormatError, unpackProject, type Project } from "../shared/format";
-import type { AiRequest, AiResponse, FileData, FileFilter, OpenedProject, Result, ScriptBuild, ScriptParameter, ScriptValues, Settings } from "../shared/ipc";
+import type { AiRequest, AiResponse, FileData, FileFilter, OpenedProject, Result, ScriptBuild, ScriptParameter, ScriptValues, Settings, SliceRequest } from "../shared/ipc";
 import { buildScript, inspectScript } from "./scriptParts";
 import { sendSticks, startLink, stopLink, type DroneSticks } from "./droneLink";
 
-import { LOCAL_MODELS } from "../shared/localModels";
+import { LOCAL_MODELS, MAX_LOCAL_FOLDER_FILES } from "../shared/localModels";
+import { REMOTE_MODELS } from "../shared/remoteModels";
+import { fetchRemoteModel } from "./modelDownload";
 import { randomBytes } from "node:crypto";
 import { mcpStatus, startMcp, stopMcp, type ToolBridge } from "./mcp";
 import { cancelChat, chatTurn, forgetChat } from "./chat";
@@ -19,6 +21,8 @@ import { flashImage, isPort, listPorts, sendToMonitor, startMonitor, stopAll, st
 import { SecretStore } from "./secrets";
 import { secureStorageStatus } from "./secrets";
 import { openInSlicer, slicerStatus } from "./slicer";
+import { cancelSlicing, slice, sliceCatalog, slicedPlate } from "./bambuSlice";
+import { copyToDrive, ejectDrive, listDrives } from "./drives";
 import { JsonStorage, writeFileAtomic } from "./storage";
 
 // Tests point this at a temporary folder so they never touch real user data.
@@ -386,16 +390,46 @@ function registerAiIpc() {
 }
 
 function registerLocalModelIpc() {
-  ipcMain.handle("model:readLocal", async (_e, key: string): Promise<Result<FileData>> => {
+  const readModel = async (file: string): Promise<FileData> => {
+    const info = await fs.stat(file);
+    if (!info.isFile()) throw new Error(`"${path.basename(file)}" is not a file.`);
+    if (info.size > MAX_MODEL_BYTES) throw new Error(`"${path.basename(file)}" is too large.`);
+    return { name: path.basename(file), bytes: new Uint8Array(await fs.readFile(file)) };
+  };
+  ipcMain.handle("model:readLocal", async (_e, key: string): Promise<Result<FileData[]>> => {
     const entry = Object.prototype.hasOwnProperty.call(LOCAL_MODELS, key) ? LOCAL_MODELS[key] : undefined;
     if (!entry) return { ok: false, error: "Unknown model." };
-    const file = path.join(app.getPath("home"), entry.file);
+    const home = app.getPath("home");
     try {
-      const info = await fs.stat(file);
-      if (info.size > MAX_MODEL_BYTES) throw new Error("The file is too large.");
-      return { ok: true, value: { name: path.basename(file), bytes: new Uint8Array(await fs.readFile(file)) } };
+      if ("file" in entry) return { ok: true, value: [await readModel(path.join(home, entry.file))] };
+      const folder = path.join(home, entry.folder);
+      const skip = new Set((entry.skip ?? []).map((s) => s.toLowerCase()));
+      const names = (await fs.readdir(folder, { withFileTypes: true }))
+        .filter((d) => d.isFile() && /\.stl$/i.test(d.name) && !skip.has(d.name.replace(/\.stl$/i, "").toLowerCase()))
+        .map((d) => d.name)
+        .sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
+      if (names.length === 0) throw new Error("No .stl files in the folder.");
+      if (names.length > MAX_LOCAL_FOLDER_FILES) throw new Error(`More than ${MAX_LOCAL_FOLDER_FILES} files in the folder.`);
+      const files: FileData[] = [];
+      for (const name of names) files.push(await readModel(path.join(folder, name)));
+      return { ok: true, value: files };
     } catch (error) {
-      return { ok: false, error: `Could not load ${entry.name} (${entry.file}): ${describeError(error)}` };
+      return { ok: false, error: `Could not load ${entry.name} (${"file" in entry ? entry.file : entry.folder}): ${describeError(error)}` };
+    }
+  });
+  // Print files from GitHub. MAKERSTUDIO_MODEL_SOURCE replaces raw.githubusercontent.com (tests).
+  ipcMain.handle("model:readRemote", async (_e, key: string): Promise<Result<FileData[]>> => {
+    const entry = Object.prototype.hasOwnProperty.call(REMOTE_MODELS, key) ? REMOTE_MODELS[key] : undefined;
+    if (!entry) return { ok: false, error: "Unknown model." };
+    try {
+      const files = await fetchRemoteModel(entry, {
+        cacheDir: path.join(app.getPath("userData"), "model-cache"),
+        base: process.env.MAKERSTUDIO_MODEL_SOURCE,
+        fetch: (url, init) => net.fetch(url, init),
+      });
+      return { ok: true, value: files };
+    } catch (error) {
+      return { ok: false, error: `Could not download the ${entry.name} from github.com/${entry.repo} (${describeError(error)}). The starter shapes are in 3D Studio; start the project again when you are online.` };
     }
   });
 }
@@ -455,9 +489,49 @@ function registerSlicerIpc() {
   });
 }
 
+function registerPrintIpc() {
+  const wrap = async <T>(work: () => Promise<T>): Promise<Result<T>> => {
+    try {
+      return { ok: true, value: await work() };
+    } catch (error) {
+      return { ok: false, error: describeError(error) };
+    }
+  };
+  ipcMain.handle("print:catalog", () => wrap(async () => {
+    const { printer } = await storage.getSettings();
+    return sliceCatalog(printer.name, printer.nozzle);
+  }));
+  ipcMain.handle("print:slice", (_e, request: SliceRequest) => wrap(async () => {
+    const { printer } = await storage.getSettings();
+    return slice(request, printer, exportsFolder());
+  }));
+  ipcMain.handle("print:cancel", () => cancelSlicing());
+  ipcMain.handle("print:gcode", (_e, id: string, plate: number) => wrap(async () => new Uint8Array(await fs.readFile(slicedPlate(id, plate).gcode))));
+  ipcMain.handle("print:drives", () => wrap(() => listDrives()));
+  ipcMain.handle("print:copy", (_e, id: string, plate: number, mount: string) => wrap(async () => {
+    const p = slicedPlate(id, plate);
+    return copyToDrive(p.file, mount, p.fileName);
+  }));
+  ipcMain.handle("print:eject", (_e, mount: string) => wrap(async () => { await ejectDrive(mount); return null; }));
+  ipcMain.handle("print:openInBambu", (_e, id: string, plate: number) => wrap(async () => {
+    await openInSlicer([slicedPlate(id, plate).file]);
+    return null;
+  }));
+  ipcMain.handle("print:saveAs", (_e, id: string, plate: number) => wrap(async () => {
+    const p = slicedPlate(id, plate);
+    const options = { title: "Save the sliced file", defaultPath: path.join(app.getPath("downloads"), p.fileName), filters: [{ name: "Sliced file for Bambu Lab printers", extensions: ["3mf"] }] };
+    const pick = mainWindow ? await dialog.showSaveDialog(mainWindow, options) : await dialog.showSaveDialog(options);
+    if (pick.canceled || !pick.filePath) return null;
+    const target = pick.filePath.toLowerCase().endsWith(".3mf") ? pick.filePath : `${pick.filePath}.gcode.3mf`;
+    await fs.copyFile(p.file, target);
+    return target;
+  }));
+}
+
 function registerIpc() {
   registerModelIpc();
   registerSlicerIpc();
+  registerPrintIpc();
   registerCodeIpc();
   registerLocalModelIpc();
   registerAiIpc();

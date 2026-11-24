@@ -1,0 +1,242 @@
+/* ==========================================================================
+   Nova look: calm and friendly. Soft slate background, one soft teal accent,
+   gentle off-white text, rounded chunky controls, no glows or gradients
+   (owner: the bright neon look was hard on the eyes).
+   Everything is scoped to :root[data-theme="nova"], so Classic is untouched.
+   ========================================================================== */
+
+:root[data-theme="nova"] {
+  --bg: #1e242b;
+  --bg-raised: #232a32;
+  --bg-panel: #262d35;
+  --bg-input: #1a1f25;
+  --border: #323b45;
+  --border-strong: #3e4954;
+  --text: #dfe4e8;
+  --text-muted: #98a3ad;
+  --accent: #5fb8a8;
+  --accent-hover: #6cc4b4;
+  --accent-2: #7cc4b7;
+  --accent-soft: rgba(95, 184, 168, 0.14);
+  --accent-glow: 0 0 0 1px rgba(95, 184, 168, 0.6);
+  --danger: #e07a7a;
+  --warn: #d9b25f;
+  --good: #7cc49a;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --font: "Lexend Variable", "Lexend", "Segoe UI", "Noto Sans", system-ui, sans-serif;
+  --display: "Fredoka Variable", "Fredoka", var(--font);
+  --ink: #12201d;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  --chrome: #232a32;
+  --ws: var(--accent);
+  color-scheme: dark;
+}
+
+/* ---------- Base ---------- */
+:root[data-theme="nova"] body { font-size: 15px; letter-spacing: 0.005em; background: var(--bg); }
+:root[data-theme="nova"] ::selection { background: rgba(95, 184, 168, 0.35); }
+:root[data-theme="nova"] :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+:root[data-theme="nova"] h1 { font-family: var(--display); font-weight: 600; font-size: 32px; letter-spacing: 0; }
+:root[data-theme="nova"] h2 { font-family: var(--display); font-weight: 600; font-size: 18px; text-transform: none; letter-spacing: 0.01em; color: var(--text); }
+:root[data-theme="nova"] h3,
+:root[data-theme="nova"] h4 { font-family: var(--display); font-weight: 600; letter-spacing: 0.01em; }
+:root[data-theme="nova"] .small { font-size: 12.5px; }
+:root[data-theme="nova"] .accent { color: var(--accent); text-shadow: none; }
+
+:root[data-theme="nova"] ::-webkit-scrollbar { width: 11px; height: 11px; }
+:root[data-theme="nova"] ::-webkit-scrollbar-track { background: transparent; }
+:root[data-theme="nova"] ::-webkit-scrollbar-thumb { background: #3a444f; border-radius: 999px; border: 3px solid transparent; background-clip: padding-box; }
+:root[data-theme="nova"] ::-webkit-scrollbar-thumb:hover { background-color: #4a5561; }
+
+/* ---------- Top bar ---------- */
+:root[data-theme="nova"] .topbar { height: 58px; gap: 18px; padding: 0 14px 0 16px; background: var(--chrome); border-bottom: 1px solid var(--border); }
+:root[data-theme="nova"] .brand { width: 208px; gap: 11px; }
+:root[data-theme="nova"] .brand-mark { width: 32px; height: 32px; border-radius: 10px; background: var(--accent); color: var(--ink); box-shadow: none; }
+:root[data-theme="nova"] .brand-name { font-family: var(--display); font-size: 19px; font-weight: 600; letter-spacing: 0.01em; }
+:root[data-theme="nova"] .brand-name b { color: var(--accent); }
+:root[data-theme="nova"] .project-title { gap: 12px; }
+:root[data-theme="nova"] .project-name { font-family: var(--display); font-size: 16px; padding: 4px 14px; border-radius: 999px; background: var(--bg-panel); border: 1px solid var(--border); }
+:root[data-theme="nova"] .dirty-dot { width: 10px; height: 10px; }
+:root[data-theme="nova"] .topbar-actions { gap: 6px; }
+:root[data-theme="nova"] .icon-btn { width: 38px; height: 38px; border-radius: 12px; color: var(--text-muted); transition: background 0.15s, color 0.15s; }
+:root[data-theme="nova"] .icon-btn:hover:not(:disabled) { background: var(--bg-panel); color: var(--text); border-color: var(--border-strong); }
+:root[data-theme="nova"] .icon-btn.active { color: var(--accent); background: var(--accent-soft); border-color: rgba(95, 184, 168, 0.4); }
+:root[data-theme="nova"] .icon-btn.small { width: 30px; height: 30px; border-radius: 10px; }
+
+/* ---------- Sidebar ---------- */
+:root[data-theme="nova"] .sidebar { width: 238px; padding: 14px 10px; gap: 3px; background: var(--chrome); border-right: 1px solid var(--border); }
+:root[data-theme="nova"] .nav-item { gap: 12px; padding: 6px 10px 6px 7px; border-radius: 14px; color: var(--text); transition: background 0.15s; }
+:root[data-theme="nova"] .nav-item:hover { background: var(--bg-panel); }
+:root[data-theme="nova"] .nav-icon { width: 40px; height: 40px; border-radius: 12px; color: var(--accent); background: var(--accent-soft); border: 1px solid transparent; transition: background 0.15s, color 0.15s; }
+:root[data-theme="nova"] .nav-item.active { background: var(--bg-panel); border-color: var(--border-strong); }
+:root[data-theme="nova"] .nav-item.active .nav-icon { background: var(--accent); color: var(--ink); }
+:root[data-theme="nova"] .nav-item.active svg { color: inherit; filter: none; }
+:root[data-theme="nova"] .nav-text { line-height: 1.22; }
+:root[data-theme="nova"] .nav-label { flex: none; font-family: var(--display); font-weight: 600; font-size: 15.5px; }
+:root[data-theme="nova"] .nav-tagline { display: block; font-size: 11.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Pages, cards ---------- */
+:root[data-theme="nova"] .workspace { background: var(--bg); }
+:root[data-theme="nova"] .page { padding: 30px 36px 56px; margin: 0 auto; }
+:root[data-theme="nova"] .page.home { max-width: 1260px; }
+:root[data-theme="nova"] .card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 22px; box-shadow: none; }
+:root[data-theme="nova"] .grid-2 { gap: 18px; }
+:root[data-theme="nova"] .big { font-family: var(--display); font-size: 21px; }
+:root[data-theme="nova"] .badge { border-radius: 999px; padding: 1px 8px; font-weight: 600; }
+
+/* ---------- Buttons ---------- */
+:root[data-theme="nova"] .btn { height: 40px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--bg-raised); color: var(--text); font-weight: 600; transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+:root[data-theme="nova"] .btn:hover:not(:disabled) { background: #2c343d; border-color: var(--accent); }
+:root[data-theme="nova"] .btn:active:not(:disabled) { transform: scale(0.98); }
+:root[data-theme="nova"] .btn.primary { background: var(--accent); color: var(--ink); border: 0; box-shadow: none; }
+:root[data-theme="nova"] .btn.primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: none; }
+:root[data-theme="nova"] .btn.danger { color: var(--danger); border-color: rgba(224, 122, 122, 0.5); }
+:root[data-theme="nova"] .btn.small { height: 32px; padding: 0 13px; font-size: 12.5px; }
+:root[data-theme="nova"] .btn.on { border-color: var(--accent); box-shadow: var(--accent-glow); }
+:root[data-theme="nova"] .link-btn { color: var(--accent); font-weight: 600; }
+
+/* ---------- Fields ---------- */
+:root[data-theme="nova"] input:not([type="checkbox"]):not([type="range"]):not([type="color"]):not([type="radio"]),
+:root[data-theme="nova"] textarea,
+:root[data-theme="nova"] select { background: var(--bg-input); border: 1px solid var(--border-strong); border-radius: 10px; color: var(--text); }
+:root[data-theme="nova"] input:focus, :root[data-theme="nova"] textarea:focus, :root[data-theme="nova"] select:focus { border-color: var(--accent); box-shadow: var(--accent-glow); outline: none; }
+:root[data-theme="nova"] input[type="checkbox"], :root[data-theme="nova"] input[type="radio"], :root[data-theme="nova"] input[type="range"] { accent-color: var(--accent); }
+:root[data-theme="nova"] select option, :root[data-theme="nova"] select optgroup { background: #262d35; color: var(--text); }
+:root[data-theme="nova"] .field > span { color: var(--text-muted); font-weight: 500; }
+
+/* ---------- Floating toolbars (3D views) ---------- */
+:root[data-theme="nova"] .seg { background: rgba(35, 42, 50, 0.96); border: 1px solid var(--border-strong); border-radius: 999px; padding: 3px; gap: 2px; box-shadow: var(--shadow); }
+:root[data-theme="nova"] .seg button { border: 0; border-radius: 999px; padding: 6px 13px; font-size: 13px; color: var(--text-muted); transition: background 0.15s, color 0.15s; }
+:root[data-theme="nova"] .seg button:hover { color: var(--text); background: var(--bg-panel); }
+:root[data-theme="nova"] .seg button.on { background: var(--accent); color: var(--ink); font-weight: 600; }
+:root[data-theme="nova"] .viewport-toolbar { top: 12px; left: 12px; right: 12px; }
+:root[data-theme="nova"] .viewport-hint { background: rgba(35, 42, 50, 0.97); border: 1px solid var(--border-strong); box-shadow: var(--shadow); padding: 8px 18px; font-size: 13.5px; bottom: 18px; }
+
+/* ---------- 3D Studio ---------- */
+:root[data-theme="nova"] .cad-left { width: 240px; background: var(--chrome); border-right: 1px solid var(--border); overflow-y: auto; overflow-x: hidden; }
+:root[data-theme="nova"] .cad-section { padding: 14px; border-bottom: 1px solid var(--border); }
+:root[data-theme="nova"] .cad-section h4,
+:root[data-theme="nova"] .inspector h4 { display: flex; align-items: center; gap: 8px; font-family: var(--display); font-size: 14.5px; font-weight: 600; text-transform: none; letter-spacing: 0.01em; color: var(--text); }
+:root[data-theme="nova"] .shape-grid { gap: 8px; }
+:root[data-theme="nova"] .shape-btn { gap: 5px; padding: 10px 2px 8px; border-radius: 14px; background: var(--bg-panel); border: 1px solid var(--border); color: var(--text); font-size: 12px; font-weight: 500; transition: background 0.15s, border-color 0.15s, transform 0.12s; }
+:root[data-theme="nova"] .shape-btn svg { color: var(--accent); }
+:root[data-theme="nova"] .shape-btn:hover { color: var(--text); transform: translateY(-1px); border-color: var(--accent); background: #2c343d; box-shadow: none; }
+:root[data-theme="nova"] .file-actions { gap: 6px; }
+:root[data-theme="nova"] .file-actions .btn { border-radius: 10px; padding: 0 8px; }
+:root[data-theme="nova"] .tree { font-size: 13.5px; }
+:root[data-theme="nova"] .tree-row { padding: 6px 8px; border-radius: 10px; }
+:root[data-theme="nova"] .tree-row:hover { background: var(--bg-panel); }
+:root[data-theme="nova"] .tree-row.selected { background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgba(95, 184, 168, 0.45); }
+:root[data-theme="nova"] .swatch { width: 12px; height: 12px; border-radius: 4px; }
+:root[data-theme="nova"] .inspector { width: 290px; padding: 16px; background: var(--chrome); border-left: 1px solid var(--border); }
+:root[data-theme="nova"] .num-input { border-radius: 10px; }
+:root[data-theme="nova"] .print-issue { border-radius: 10px; }
+
+/* ---------- AI panel ---------- */
+:root[data-theme="nova"] .ai-panel { width: 330px; background: var(--chrome); border-left: 1px solid var(--border); }
+:root[data-theme="nova"] .ai-header { padding: 14px 14px 14px 18px; }
+:root[data-theme="nova"] .ai-title { font-family: var(--display); font-size: 17px; color: var(--text); }
+:root[data-theme="nova"] .chat-msg { border-radius: 14px; }
+:root[data-theme="nova"] .chat-msg.user { background: var(--accent-soft); }
+:root[data-theme="nova"] .proposal { border-radius: 14px; }
+
+/* ---------- Dialogs and notifications ---------- */
+:root[data-theme="nova"] .dialog-backdrop { background: rgba(10, 13, 16, 0.6); }
+:root[data-theme="nova"] .dialog { border-radius: 20px; padding: 26px 26px 20px; background: var(--bg-panel); border: 1px solid var(--border-strong); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); }
+:root[data-theme="nova"] .dialog h3 { font-size: 20px; }
+:root[data-theme="nova"] .toasts { gap: 10px; }
+:root[data-theme="nova"] .toast { border-radius: 14px; padding: 12px 12px 12px 16px; background: #2a323b; border: 1px solid var(--border-strong); border-left-width: 1px; box-shadow: var(--shadow); animation: nova-pop 0.2s ease-out; }
+:root[data-theme="nova"] .toast.success { box-shadow: var(--shadow), inset 4px 0 0 var(--good); }
+:root[data-theme="nova"] .toast.error { box-shadow: var(--shadow), inset 4px 0 0 var(--danger); }
+:root[data-theme="nova"] .toast.info { box-shadow: var(--shadow), inset 4px 0 0 var(--accent); }
+@keyframes nova-pop { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ---------- Home ---------- */
+:root[data-theme="nova"] .home-hero { padding: 10px 0 26px; }
+:root[data-theme="nova"] .home-hi { font-family: var(--display); font-size: 19px; }
+:root[data-theme="nova"] .home-hero h1 { font-size: 40px; line-height: 1.1; margin-bottom: 10px; }
+:root[data-theme="nova"] .tagline { color: var(--text-muted); font-size: 16.5px; }
+:root[data-theme="nova"] .studio-grid { gap: 16px; margin-bottom: 22px; }
+:root[data-theme="nova"] .studio-card { padding: 18px 18px 16px; border-radius: 18px; border: 1px solid var(--border); background: var(--bg-panel); box-shadow: none; }
+:root[data-theme="nova"] .studio-card:hover { transform: translateY(-2px); border-color: var(--accent); background: #2a323b; box-shadow: none; }
+:root[data-theme="nova"] .studio-icon { width: 52px; height: 52px; border-radius: 15px; background: var(--accent-soft); color: var(--accent); box-shadow: none; }
+:root[data-theme="nova"] .studio-card:hover .studio-icon { background: var(--accent); color: var(--ink); }
+:root[data-theme="nova"] .studio-name { font-family: var(--display); font-size: 19px; font-weight: 600; }
+:root[data-theme="nova"] .studio-summary { font-size: 13.5px; }
+:root[data-theme="nova"] .studio-go { color: var(--accent); }
+:root[data-theme="nova"] .studio-go svg { transition: transform 0.2s; }
+:root[data-theme="nova"] .studio-card:hover .studio-go svg { transform: translateX(3px); }
+:root[data-theme="nova"] .recent-open:hover { background: #2c343d; }
+:root[data-theme="nova"] .checklist svg { color: var(--good); }
+
+/* ---------- Settings: look picker ---------- */
+:root[data-theme="nova"] .look-option { border-radius: 16px; background: var(--bg-input); }
+:root[data-theme="nova"] .look-option b { font-family: var(--display); font-size: 17px; }
+
+/* ---------- Practice projects, parts, misc ---------- */
+:root[data-theme="nova"] .practice-card { border-radius: 16px; background: var(--bg-panel); }
+:root[data-theme="nova"] .practice-card a { color: var(--accent); }
+:root[data-theme="nova"] .parts-cats button { border-radius: 999px; padding: 3px 10px; font-size: 12px; }
+:root[data-theme="nova"] .parts-cats button.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+:root[data-theme="nova"] .parts-row { border-radius: 10px; }
+:root[data-theme="nova"] .planned-icon { border-radius: 24px; background: var(--accent-soft); color: var(--accent); box-shadow: none; }
+
+/* ---------- Other studios ---------- */
+:root[data-theme="nova"] .circuit-canvas { background: #1b2127; }
+:root[data-theme="nova"] .device-log,
+:root[data-theme="nova"] .code-editor,
+:root[data-theme="nova"] .serial-out { background: #171b20; border-color: var(--border-strong); border-radius: 12px; }
+:root[data-theme="nova"] .sim-badge { color: var(--good); background: rgba(124, 196, 154, 0.12); border-color: rgba(124, 196, 154, 0.4); }
+:root[data-theme="nova"] .sim-readout { border-radius: 12px; border-color: rgba(95, 184, 168, 0.35); background: rgba(95, 184, 168, 0.06); }
+:root[data-theme="nova"] .drone-hud { background: rgba(35, 42, 50, 0.95); border-color: var(--border-strong); border-radius: 14px; }
+:root[data-theme="nova"] .drone-motor-bars > div { background: var(--bg-input); }
+:root[data-theme="nova"] .drone-motor-bars i { background: var(--accent); }
+:root[data-theme="nova"] .drone-finding.good .drone-verdict { color: var(--good); background: rgba(124, 196, 154, 0.15); }
+:root[data-theme="nova"] .measure-label { background: rgba(35, 42, 50, 0.96); border-radius: 10px; }
+:root[data-theme="nova"] .timeline, :root[data-theme="nova"] .key-editor { border-radius: 14px; }
+:root[data-theme="nova"] .empty-state h3 { font-size: 20px; }
+
+/* ---------- Print panel ---------- */
+:root[data-theme="nova"] .btn.pp-open { height: 46px; font-size: 16px; font-family: var(--display); letter-spacing: 0.02em; }
+:root[data-theme="nova"] .print-panel { width: 340px; gap: 14px; }
+:root[data-theme="nova"] .pp-head h2 { font-size: 24px; color: var(--text); }
+:root[data-theme="nova"] .pp-step { border-radius: 16px; padding: 14px; background: var(--bg-panel); border: 1px solid var(--border); }
+:root[data-theme="nova"] .pp-step-num { width: 30px; height: 30px; font-family: var(--display); font-size: 15px; color: var(--ink); background: var(--accent); box-shadow: none; }
+:root[data-theme="nova"] .pp-step.done { border-color: rgba(124, 196, 154, 0.55); }
+:root[data-theme="nova"] .pp-step.done .pp-step-num { background: var(--good); }
+:root[data-theme="nova"] .pp-step-head h3 { font-size: 17px; }
+:root[data-theme="nova"] .pp-printer { font-family: var(--display); font-size: 15px; }
+:root[data-theme="nova"] .pp-field select { height: 38px; border-radius: 12px; }
+:root[data-theme="nova"] .pp-chips button { padding: 6px 13px; font-size: 13px; border-radius: 999px; background: var(--bg-input); transition: background 0.15s; }
+:root[data-theme="nova"] .pp-chips button.on { background: var(--accent); color: var(--ink); border-color: transparent; box-shadow: none; }
+:root[data-theme="nova"] .pp-tip { border-radius: 12px; padding: 8px 10px; background: var(--accent-soft); border: 1px solid rgba(95, 184, 168, 0.3); }
+:root[data-theme="nova"] .pp-tip.warn { background: rgba(217, 178, 95, 0.12); border-color: rgba(217, 178, 95, 0.35); }
+:root[data-theme="nova"] .btn.pp-big { min-height: 58px; border-radius: 16px; font-family: var(--display); font-size: 20px; letter-spacing: 0.02em; }
+:root[data-theme="nova"] .pp-big-sub { font-family: var(--font); }
+:root[data-theme="nova"] .pp-progress { height: 10px; background: var(--bg-input); }
+:root[data-theme="nova"] .pp-progress span { background: var(--accent); box-shadow: none; }
+:root[data-theme="nova"] .pp-stat { border-radius: 14px; padding: 10px 4px; background: var(--bg-input); border: 1px solid var(--border); }
+:root[data-theme="nova"] .pp-stat b { font-family: var(--display); font-size: 19px; }
+:root[data-theme="nova"] .pp-stat .pp-ico { margin-bottom: 4px; }
+:root[data-theme="nova"] .pp-plates button { border-radius: 999px; padding: 5px 14px; }
+:root[data-theme="nova"] .pp-plates button.on { background: var(--accent); color: var(--ink); border-color: transparent; }
+:root[data-theme="nova"] .pp-legend-item { padding: 3px 10px 3px 5px; background: var(--bg-input); }
+:root[data-theme="nova"] .pp-card { border-radius: 14px; background: var(--bg-input); padding: 12px; }
+:root[data-theme="nova"] .pp-card.done { border-color: var(--good); }
+:root[data-theme="nova"] .pp-card-head .pp-ico { width: 38px; height: 38px; border-radius: 12px; }
+:root[data-theme="nova"] .pp-good { color: var(--good); }
+:root[data-theme="nova"] .pp-callout { border-radius: 12px; }
+:root[data-theme="nova"] .pp-list li::marker, :root[data-theme="nova"] .pp-howto li::marker { color: var(--accent); font-weight: 700; }
+:root[data-theme="nova"] .layer-slider { background: rgba(35, 42, 50, 0.96); border: 1px solid var(--border-strong); box-shadow: var(--shadow); width: 44px; right: 18px; }
+:root[data-theme="nova"] .layer-slider span { font-family: var(--display); font-size: 12px; }
+
+/* ---------- Narrow windows: icon-only sidebar ---------- */
+@media (max-width: 1100px) {
+  :root[data-theme="nova"] .sidebar { width: 72px; }
+  :root[data-theme="nova"] .nav-text { display: none; }
+  :root[data-theme="nova"] .brand { width: auto; }
+  :root[data-theme="nova"] .cad-left { width: 200px; }
+  :root[data-theme="nova"] .inspector { width: 250px; }
+  :root[data-theme="nova"] .home-hero .mascot { display: none; }
+}

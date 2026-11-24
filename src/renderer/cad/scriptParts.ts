@@ -48,6 +48,11 @@ export const useScript = create<ScriptState>()((set, get) => ({
   },
 }));
 
+// Another project was opened: the script panel was for the old one.
+projectStore.subscribe((state, previous) => {
+  if (state.loads !== previous.loads) useScript.getState().close();
+});
+
 export const fileName = (path: string) => path.split(/[\\/]/).pop() ?? path;
 const stem = (name: string) => name.replace(/\.[^.]+$/, "");
 
@@ -80,8 +85,13 @@ export async function buildOpenScript() {
   const { path, values, building } = useScript.getState();
   if (!path || building) return;
   useScript.setState({ building: true, log: "" });
+  const loads = projectStore.getState().loads;
   try {
     const result = await window.makerstudio.buildScript(path, values);
+    if (projectStore.getState().loads !== loads) {
+      notify("info", `"${fileName(path)}" finished building after another project was opened, so nothing was added. Open the script again to build it for this project.`);
+      return;
+    }
     if (!result.ok) { notify("error", result.error); return; }
     if (!result.value) return; // the owner said no
     const { files, log, seconds, skipped } = result.value;

@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-11-23 — Opening another project starts fresh
+- **3D view**: opening a project now shows its parts (the camera is centred on them from the usual angle); a new project shows the empty bed. Before, the camera stayed where it was and big imported figures could be off screen.
+- Nothing from the old project is left behind: the selection, measuring points, workplane and print check are cleared; the Print panel stays open but the old sliced print, its layers and the "copy to card" button go (a slice still running is stopped); the circuit simulation and running Uno / Pico code stop; the script panel closes; a script part that finishes building after the switch is not added to the new project.
+- **AI proposals** still waiting for approval when another project is opened can no longer be approved: they were made for the old project ("Could not be applied: it was made for the project that was open before.").
+- Every studio page starts fresh on the new project (a drone flight, robot preview or face animation of the old project stops; a real drone link disconnects and disarms).
+- **No card reader? Send it from Bambu Studio**: step 4 of the Print panel has **Open this print in Bambu Studio**. Bambu Studio opens the sliced file with the same printer, plate, filament, quality and part positions; press Slice plate, then Print plate to send it over the internet (you need to be logged in to Bambu Studio, with the printer added to your Bambu account). The other button is now called "Open the model in Bambu Studio" (for colour painting and advanced settings).
+- **Layer preview**: the 3D view fits the sliced layers when they appear (Bambu Studio arranges the parts on the plate its own way, so they could sit at the edge of the view), fits your model again when you go back to it, and Fit frames whichever one is shown.
+- **Print panel**: a card reader plugged in while the panel is open shows up by itself (it looks every 3 seconds); no need to press Find cards. After ejecting, plugging a card in again starts step 3 again.
+
+## 2026-11-23 — New look: Nova
+- **Nova** is the new default look: soft slate background, one calm teal accent, gentle off-white text, no glows or gradients (easy on the eyes), rounded chunky buttons, and bigger, friendlier text (Lexend, with Fredoka for headings; both bundled, Open Font License). **Classic** (the original dark look) is one click away in Settings → Look.
+- **Home** asks "What do you want to make today?" with Bolt, the MakerStudio helper robot, and a big card for every studio plus Practice projects.
+- **Sidebar**: each studio has an icon tile and a few words about what it is for ("Make 3D shapes", "Wire up electronics", …).
+- The 3D views (3D Studio, Robotics Studio) follow the chosen look; a short teal confetti burst when a print is sliced and when it is on the SD card (not shown when the system asks for reduced motion).
+- The Print panel uses line icons, the quality hint sits under its list, and the copied message shows the file name on the card.
+
+## 2026-11-23 — Print it: slice and print from the SD card without leaving MakerStudio
+- **Print it!** (3D Studio, left column) opens the Print panel with four steps: choose how to print it, slice it, put it on the SD card, print it.
+- **Slicing uses Bambu Studio's own slicer** in the background (no Bambu Studio window). Quality, material and plate lists come from Bambu Studio's profiles for the printer in Settings (A1: 0.20mm Standard, Bambu PLA Basic, Textured PEI plate by default); supports (None / Tree / Normal) and strength inside (Light 10 % … Solid 100 %). Choices are remembered.
+- Results: print time, filament (grams and metres), layers and height. When the parts need more than one plate, each plate gets its own file.
+- **Layer preview** in the 3D view: walls, infill, supports and so on in their own colours (tap one in the legend to hide it), a layer slider, the current layer drawn lighter.
+- **SD card**: finds cards in a USB card reader (Linux: mounted removable FAT32/exFAT drives; Windows: removable drive letters), copies the file without overwriting anything, checks free space, says when a card is not FAT32, and ejects it safely (Linux).
+- The sliced file includes the printer model id and a picture of the parts for the printer's screen (the command-line slicer leaves both out).
+- Save file… and Show folder; Open in Bambu Studio is still there for colour painting and advanced settings.
+
 ## 2026-11-09 — Options: zoom, 3MF, drone wiring, AI drone tools, brushless, real height hold
 - **Interface size**: Settings, or Ctrl+= / Ctrl+− / Ctrl+Shift+0; remembered.
 - **3MF import** in 3D Studio (button and drag and drop): every object, in place.

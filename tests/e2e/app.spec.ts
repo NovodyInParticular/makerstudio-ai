@@ -20,6 +20,8 @@ async function launch() {
       MAKERSTUDIO_MOCK_AI: "1",
       MAKERSTUDIO_SLICER: path.join(workDir, "fake-slicer.sh"),
       MAKERSTUDIO_SKIP_CLOSE_PROMPT: "1",
+      // No downloads in these tests: practice projects fall back to their starter shapes.
+      MAKERSTUDIO_MODEL_SOURCE: "http://127.0.0.1:9",
     },
   });
   page = await app.firstWindow();
@@ -553,6 +555,8 @@ test("Robotics Studio: joint on the Stack-chan head, pose, mount the face, wiggl
     await page.locator(".dialog button", { hasText: "Discard changes" }).click();
   }
   await expect(page.getByText(/Started "Stack-chan desk robot/)).toBeVisible();
+  // Offline: the case files cannot be downloaded, so it says so and keeps the starter shapes.
+  await expect(page.getByText(/Could not download the Stack-chan case \(SG90 servo version\) from github.com\/stack-chan\/stack-chan/)).toBeVisible();
   // A face to put on it.
   await page.keyboard.press("Control+6");
   await page.click('[data-testid="new-face"]');
@@ -689,6 +693,7 @@ test("Circuit Studio: wire an LED to an Uno, live checks catch mistakes", async 
   await page.keyboard.press("Control+z");
   await expect(page.locator('[data-testid="circuit-part"]')).toHaveCount(3);
 });
+
 
 test("Claude Code connection (MCP): read, propose, approve in the AI panel, undo; locked down", async () => {
   const { Client } = await import("@modelcontextprotocol/sdk/client/index.js");

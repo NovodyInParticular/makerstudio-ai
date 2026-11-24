@@ -20,6 +20,16 @@ export const useAi = create<AiState>()((set) => ({
   setMode: (mode) => set({ mode }),
 }));
 
+// Another project was opened: changes proposed for the old one must not be applied to it.
+projectStore.subscribe((state, previous) => {
+  if (state.loads === previous.loads) return;
+  const proposals = useAi.getState().proposals;
+  if (!proposals.some((p) => p.status === "pending")) return;
+  useAi.setState({
+    proposals: proposals.map((p) => (p.status === "pending" ? { ...p, status: "failed" as const, error: "it was made for the project that was open before." } : p)),
+  });
+});
+
 function openProposal(source: string): Proposal | null {
   return useAi.getState().proposals.find((p) => p.source === source && p.status === "pending") ?? null;
 }

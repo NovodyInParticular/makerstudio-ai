@@ -2,6 +2,9 @@
 
 import { createPracticeProject, type PracticeProject } from "../core/practice/catalog";
 import { createEmptyProject, duplicateProject } from "../shared/format";
+import type { FileData } from "../shared/ipc";
+import { replaceVariants } from "../shared/localModels";
+import { REMOTE_MODELS, remoteModelBytes } from "../shared/remoteModels";
 import { APP_VERSION, ask, projectStore, useUi } from "./state";
 
 const api = () => window.makerstudio;
@@ -48,20 +51,44 @@ export async function startPracticeProject(p: PracticeProject) {
   if (!(await confirmDiscard("start a practice project"))) return;
   projectStore.getState().load(createPracticeProject(p, APP_VERSION), null);
   useUi.getState().setWorkspace("projects");
-  const loaded: string[] = [];
+  const projectId = projectStore.getState().project.document.id;
+  const stillOpen = () => projectStore.getState().project.document.id === projectId;
+  const files: FileData[] = [];
   for (const key of p.localModels ?? []) {
     const result = await api().readLocalModel(key);
     if (!result.ok) { useUi.getState().notify("error", result.error); continue; }
-    const { importModelBytes } = await import("./cad/fileActions");
-    if (importModelBytes(result.value.name, result.value.bytes)) loaded.push(result.value.name);
+    files.push(...result.value);
   }
-  if (loaded.length) {
+  for (const key of p.remoteModels ?? []) {
+    const set = REMOTE_MODELS[key];
+    if (set) {
+      const mb = (remoteModelBytes(set) / 1e6).toFixed(1);
+      useUi.getState().notify("info", `Getting the ${set.name} from github.com/${set.repo} (${mb} MB the first time, then kept on this computer)…`);
+    }
+    const result = await api().readRemoteModel(key);
+    if (!result.ok) { useUi.getState().notify("error", result.error); continue; }
+    files.push(...result.value);
+  }
+  // Another project was opened while the parts were loading: leave it alone.
+  if (!stillOpen()) return;
+  let loaded = 0;
+  if (files.length) {
+    const [{ importModelGrid }, { worldBounds }] = await Promise.all([import("./cad/fileActions"), import("../core/cad/geometry")]);
+    // Lay the project's parts out to the right of the starter shapes.
+    const objects = projectStore.getState().project.document.workspaces.cad.objects;
+    const roots = objects.filter((o) => o.parentId === null && o.visible);
+    const box = roots.length ? worldBounds(roots.map((o) => o.id), objects) : null;
+    const leftEdge = box && !box.isEmpty() ? Math.round(box.max.x) + 20 : undefined;
+    loaded = importModelGrid(replaceVariants(files), { leftEdge }).length;
+  }
+  if (loaded) {
     // Small parts look lost on the 256 mm bed: start the 3D view zoomed to them.
     const { useCad } = await import("./cad/cadState");
     useCad.getState().select([]);
     useCad.getState().requestView("fit");
   }
-  useUi.getState().notify("success", `Started "${p.title}". The build plan is in the design notes${loaded.length ? `, and ${loaded.join(", ")} is in 3D Studio` : ", and starter shapes are in 3D Studio"}. Save it to keep it.`);
+  const what = loaded === 1 ? `${files[0]!.name} is in 3D Studio` : loaded > 1 ? `${loaded} parts are laid out in 3D Studio` : "starter shapes are in 3D Studio";
+  useUi.getState().notify("success", `Started "${p.title}". The build plan is in the design notes, and ${what}. Save it to keep it.`);
 }
 
 export async function openProject(path: string | null = null) {

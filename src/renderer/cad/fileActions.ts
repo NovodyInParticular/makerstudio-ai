@@ -66,6 +66,54 @@ export function importModelBytes(name: string, bytes: Uint8Array): string | null
   return object.id;
 }
 
+const GRID_ROW = 240, GRID_GAP = 6;
+
+/**
+ * Adds a set of STL / OBJ parts laid out side by side in rows (like parts on a print plate),
+ * the whole set centred on the bed, or starting at `leftEdge` (x, mm) so it sits beside other
+ * objects. Reports once for the set. Returns the new object ids.
+ */
+export function importModelGrid(files: { name: string; bytes: Uint8Array }[], options: { leftEdge?: number } = {}): string[] {
+  const parts: { name: string; mesh: MeshData }[] = [];
+  const problems: string[] = [];
+  for (const f of files) {
+    try {
+      parts.push({ name: baseName(f.name), mesh: centreOnOrigin(parseMeshFile(f.name, f.bytes)).mesh });
+    } catch (error) {
+      problems.push(`"${f.name}": ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  // Rows from the back of the bed to the front, then the whole grid is centred.
+  const placed: { x: number; y: number }[] = [];
+  let x = 0, y = 0, rowDepth = 0, width = 0;
+  for (const p of parts) {
+    const { min, max } = meshBounds(p.mesh);
+    const w = max[0] - min[0], d = max[1] - min[1];
+    if (x > 0 && x + w > GRID_ROW) { x = 0; y -= rowDepth + GRID_GAP; rowDepth = 0; }
+    placed.push({ x: x + w / 2, y: y - d / 2 });
+    x += w + GRID_GAP; rowDepth = Math.max(rowDepth, d); width = Math.max(width, x - GRID_GAP);
+  }
+  const depth = rowDepth - y;
+  const origin = useCad.getState().workplane?.origin ?? [0, 0, 0];
+  const round = (n: number) => Math.round(n * 10) / 10;
+  const left = options.leftEdge ?? origin[0] - width / 2;
+  const ids: string[] = [];
+  const checks: Promise<{ watertight: boolean } | null>[] = [];
+  parts.forEach((p, i) => {
+    const at = placed[i]!;
+    const object = addMeshObject(p.name, p.mesh, [round(left + at.x), round(origin[1] + at.y + depth / 2), origin[2]]);
+    if (!object) return;
+    ids.push(object.id);
+    checks.push(meshInfo(object));
+  });
+  for (const p of problems) notify("error", p);
+  void Promise.all(checks).then((infos) => {
+    const open = infos.filter((info) => info && !info.watertight).length;
+    if (open) notify("info", `${open} of the ${ids.length} parts are not closed (watertight); those cannot be cut or combined.`);
+  });
+  return ids;
+}
+
 /**
  * Adds several meshes as objects that keep their places relative to each other; the whole set
  * lands centred on the bed (or the workplane) and standing on it.

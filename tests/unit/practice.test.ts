@@ -52,8 +52,26 @@ describe("practice projects", () => {
 describe("local models", () => {
   it("every model a practice project loads is on the main process allowlist", async () => {
     const { LOCAL_MODELS } = await import("../../src/shared/localModels");
+    const { REMOTE_MODELS } = await import("../../src/shared/remoteModels");
     for (const p of PRACTICE_PROJECTS) for (const key of p.localModels ?? []) expect(LOCAL_MODELS[key], `${p.id}: ${key}`).toBeTruthy();
-    expect(Object.values(LOCAL_MODELS).every((m) => !m.file.includes("..") && m.file.endsWith(".stl"))).toBe(true);
+    for (const p of PRACTICE_PROJECTS) for (const key of p.remoteModels ?? []) expect(REMOTE_MODELS[key], `${p.id}: ${key}`).toBeTruthy();
+    // Every downloaded set comes from the project's own repository.
+    for (const p of PRACTICE_PROJECTS) for (const key of p.remoteModels ?? []) expect(REMOTE_MODELS[key]!.repo, p.id).toBe(p.repo);
+    for (const m of Object.values(LOCAL_MODELS)) {
+      const where = "file" in m ? m.file : m.folder;
+      expect(where.includes(".."), where).toBe(false);
+      expect(where.startsWith("/"), where).toBe(false);
+      if ("file" in m) expect(m.file.endsWith(".stl")).toBe(true);
+    }
+  });
+
+  it("kit variants replace the stock part they are built on, nothing else", async () => {
+    const { replaceVariants } = await import("../../src/shared/localModels");
+    const names = (list: { name: string }[]) => list.map((f) => f.name);
+    const files = ["head_custom.stl", "armor, shin, 2x.stl", "armor, crotch.stl", "frame, shin, 2x.stl", "armor, shin, 2x (studded).stl", "display base (round).stl", "Armor, Toe, 2x.STL", "armor, toe, 2x (plated).stl"]
+      .map((name) => ({ name }));
+    expect(names(replaceVariants(files))).toEqual(["head_custom.stl", "armor, crotch.stl", "frame, shin, 2x.stl", "armor, shin, 2x (studded).stl", "display base (round).stl", "armor, toe, 2x (plated).stl"]);
+    expect(names(replaceVariants([{ name: "a.stl" }, { name: "b.stl" }]))).toEqual(["a.stl", "b.stl"]);
   });
 });
 

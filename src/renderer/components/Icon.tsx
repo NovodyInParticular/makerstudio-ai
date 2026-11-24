@@ -1,6 +1,7 @@
 import type { IconName } from "../workspaces";
 
-type Name = IconName | "undo" | "redo" | "save" | "panel" | "close" | "plus" | "open" | "check" | "fullscreen" | "exitFullscreen";
+type Name = IconName | "undo" | "redo" | "save" | "panel" | "close" | "plus" | "open" | "check" | "fullscreen" | "exitFullscreen"
+  | "printer" | "clock" | "spool" | "layers" | "sdcard" | "refresh" | "bulb" | "warn" | "sparkle" | "arrow" | "eject";
 
 // Simple original line icons (24x24 grid, stroke based).
 const paths: Record<Name, string> = {
@@ -25,6 +26,17 @@ const paths: Record<Name, string> = {
   plus: "M12 5v14M5 12h14",
   open: "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1M3 7v10a2 2 0 0 0 2 2h12l4-9H7l-4 9",
   check: "M5 12.5 10 17l9-10",
+  printer: "M7 8V4h10v4M5 8h14a2 2 0 0 1 2 2v6h-4M7 16H3v-6a2 2 0 0 1 2-2M7 13h10v7H7zM17.5 11h.01",
+  clock: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4.5V12l3 2",
+  spool: "M12 3.5c4.4 0 8 1.4 8 3.2v10.6c0 1.8-3.6 3.2-8 3.2s-8-1.4-8-3.2V6.7c0-1.8 3.6-3.2 8-3.2ZM4 6.7c0 1.8 3.6 3.2 8 3.2s8-1.4 8-3.2M4 11.5c2 1.3 5 2 8 2s6-.7 8-2M4 15.5c2 1.3 5 2 8 2s6-.7 8-2",
+  layers: "M12 3 3 8l9 5 9-5-9-5ZM3 12.5l9 5 9-5M3 17l9 5 9-5",
+  sdcard: "M8 3h7l4 4v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2ZM9.5 3v3.5M12.5 3v3.5M15.5 4.5v2",
+  refresh: "M20 11a8 8 0 0 0-14.6-4.4L4 8.5M4 4v4.5h4.5M4 13a8 8 0 0 0 14.6 4.4l1.4-1.9M20 20v-4.5h-4.5",
+  bulb: "M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3Z",
+  warn: "M12 4 2.5 20h19L12 4Zm0 6v4.5M12 17.5v.01",
+  sparkle: "M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3ZM19 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z",
+  arrow: "M5 12h14M13 6l6 6-6 6",
+  eject: "M12 5 5 13h14L12 5ZM5 17h14v2H5z",
 };
 
 export function Icon({ name, size = 18 }: { name: Name; size?: number }) {

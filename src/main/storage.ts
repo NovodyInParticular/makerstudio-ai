@@ -29,6 +29,9 @@ export const DEFAULT_SETTINGS: Settings = {
   mcp: { enabled: false, port: 47219, token: "" },
   // In-app chat: local Ollama by default (no account, nothing leaves the computer).
   uiZoom: 1,
+  theme: "nova",
+  // Print panel: Bambu Studio's standard A1 choices until the owner picks others.
+  slicing: { process: "0.20mm Standard @BBL A1", filament: "Bambu PLA Basic @BBL A1", plate: "Textured PEI Plate", supports: "off", infill: null },
   ai: { provider: "ollama", ollamaUrl: "http://127.0.0.1:11434", ollamaModel: "qwen3.5:4b", openaiUrl: "https://api.openai.com/v1", openaiModel: "", anthropicModel: "claude-opus-5-5" },
 };
 
@@ -38,12 +41,20 @@ const SettingsSchema = z.object({
   snapEnabled: z.boolean(),
   aiPanelOpen: z.boolean(),
   uiZoom: z.number().min(0.5).max(3),
+  theme: z.enum(["nova", "classic"]),
   printer: z.object({
     name: z.string().min(1).max(100),
     bedX: z.number().positive().max(2000),
     bedY: z.number().positive().max(2000),
     bedZ: z.number().positive().max(2000),
     nozzle: z.number().positive().max(5),
+  }),
+  slicing: z.object({
+    process: z.string().max(200),
+    filament: z.string().max(200),
+    plate: z.string().max(100),
+    supports: z.enum(["off", "normal", "tree"]),
+    infill: z.number().int().min(0).max(100).nullable(),
   }),
   mcp: z.object({
     enabled: z.boolean(),
@@ -87,7 +98,7 @@ export class JsonStorage {
 
   async setSettings(patch: Partial<Settings>): Promise<Settings> {
     const current = await this.getSettings();
-    const next = SettingsSchema.parse({ ...current, ...patch, printer: { ...current.printer, ...patch.printer }, mcp: { ...current.mcp, ...patch.mcp }, ai: { ...current.ai, ...patch.ai } });
+    const next = SettingsSchema.parse({ ...current, ...patch, printer: { ...current.printer, ...patch.printer }, mcp: { ...current.mcp, ...patch.mcp }, ai: { ...current.ai, ...patch.ai }, slicing: { ...current.slicing, ...patch.slicing } });
     await writeFileAtomic(this.file("settings.json"), JSON.stringify(next, null, 2));
     return next;
   }

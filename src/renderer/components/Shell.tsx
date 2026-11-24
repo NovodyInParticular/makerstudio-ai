@@ -20,7 +20,9 @@ export function TopBar() {
   return (
     <header className="topbar">
       <div className="brand">
-        <span className="brand-mark" aria-hidden="true" />
+        <span className="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 18V7l7 6 7-6v11" /></svg>
+        </span>
         <span className="brand-name">MakerStudio <b>AI</b></span>
       </div>
       <div className="project-title" title={filePath ?? "Not saved yet"}>
@@ -61,8 +63,11 @@ export function Sidebar() {
           aria-current={current === w.id ? "page" : undefined}
           data-testid={`nav-${w.id}`}
         >
-          <Icon name={w.icon} size={20} />
-          <span className="nav-label">{w.label}</span>
+          <span className="nav-icon"><Icon name={w.icon} size={20} /></span>
+          <span className="nav-text">
+            <span className="nav-label">{w.label}</span>
+            <span className="nav-tagline">{w.tagline}</span>
+          </span>
           {w.plannedPhase && <span className="nav-phase">P{w.plannedPhase}</span>}
         </button>
       ))}

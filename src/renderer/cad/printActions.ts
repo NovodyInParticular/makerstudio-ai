@@ -44,6 +44,8 @@ async function job(type: "collect" | "check" | "orient", message: string): Promi
   busy = true;
   try {
     const result = await printJob(type, ids, objects, printerSpec());
+    // Another project was opened meanwhile: the result is about the old one.
+    if (projectStore.getState().loads !== state.loads) return null;
     if (result.parts.length === 0) {
       notify("error", ["There is nothing to print.", ...result.warnings].join(" "));
       return null;
@@ -55,6 +57,11 @@ async function job(type: "collect" | "check" | "orient", message: string): Promi
   } finally {
     busy = false;
   }
+}
+
+/** The parts as they will be printed (selected objects, or all visible ones), for slicing. */
+export function collectForSlicing() {
+  return job("collect", "Getting the parts ready to slice");
 }
 
 /** Runs the print check and keeps the result for the panel and the viewport highlights. */

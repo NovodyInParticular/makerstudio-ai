@@ -9,7 +9,7 @@ test("Drone Studio: will the Flix practice frame fly, then take off, hold height
   test.setTimeout(120000);
   const w = await mkdtemp(path.join(tmpdir(), "makerstudio-drone-"));
   const packaged = process.env.MAKERSTUDIO_EXECUTABLE;
-  const app = await electron.launch({ ...(packaged ? { executablePath: packaged, args: [] } : { args: ["."] }), env: { ...process.env, MAKERSTUDIO_USER_DATA: path.join(w, "ud"), MAKERSTUDIO_DOCUMENTS: path.join(w, "docs"), MAKERSTUDIO_SKIP_CLOSE_PROMPT: "1" } });
+  const app = await electron.launch({ ...(packaged ? { executablePath: packaged, args: [] } : { args: ["."] }), env: { ...process.env, MAKERSTUDIO_USER_DATA: path.join(w, "ud"), MAKERSTUDIO_DOCUMENTS: path.join(w, "docs"), MAKERSTUDIO_SKIP_CLOSE_PROMPT: "1", MAKERSTUDIO_MODEL_SOURCE: "http://127.0.0.1:9" } });
   const page = await app.firstWindow();
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
@@ -64,7 +64,7 @@ test("Drone Studio: export the drone code, and fly a (fake) real drone over UDP 
   test.setTimeout(120000);
   const w = await mkdtemp(path.join(tmpdir(), "makerstudio-drone-real-"));
   const packaged = process.env.MAKERSTUDIO_EXECUTABLE;
-  const app = await electron.launch({ ...(packaged ? { executablePath: packaged, args: [] } : { args: ["."] }), env: { ...process.env, MAKERSTUDIO_USER_DATA: path.join(w, "ud"), MAKERSTUDIO_DOCUMENTS: path.join(w, "docs"), MAKERSTUDIO_SKIP_CLOSE_PROMPT: "1" } });
+  const app = await electron.launch({ ...(packaged ? { executablePath: packaged, args: [] } : { args: ["."] }), env: { ...process.env, MAKERSTUDIO_USER_DATA: path.join(w, "ud"), MAKERSTUDIO_DOCUMENTS: path.join(w, "docs"), MAKERSTUDIO_SKIP_CLOSE_PROMPT: "1", MAKERSTUDIO_MODEL_SOURCE: "http://127.0.0.1:9" } });
   const page = await app.firstWindow();
   await page.waitForSelector('[data-testid="workspace-home"]');
   await page.keyboard.press("Control+8");

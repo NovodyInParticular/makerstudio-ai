@@ -192,6 +192,21 @@ export function SettingsPage() {
   return (
     <div className="page">
       <h1>Settings</h1>
+      <section className="card look-card" data-testid="look-card">
+        <h2>Look</h2>
+        <div className="look-options" role="radiogroup" aria-label="Look">
+          <button role="radio" aria-checked={settings.theme === "nova"} className={`look-option nova ${settings.theme === "nova" ? "on" : ""}`} onClick={() => void update({ theme: "nova" })} data-testid="theme-nova">
+            <span className="look-swatch" aria-hidden><i /><i /><i /><i /></span>
+            <b>Nova</b>
+            <span className="muted small">Soft slate with a calm teal, big friendly buttons. Easy on the eyes.</span>
+          </button>
+          <button role="radio" aria-checked={settings.theme === "classic"} className={`look-option classic ${settings.theme === "classic" ? "on" : ""}`} onClick={() => void update({ theme: "classic" })} data-testid="theme-classic">
+            <span className="look-swatch" aria-hidden><i /><i /><i /><i /></span>
+            <b>Classic</b>
+            <span className="muted small">The original dark charcoal look with green highlights.</span>
+          </button>
+        </div>
+      </section>
       <div className="grid-2">
         <section className="card">
           <h2>Interface size</h2>

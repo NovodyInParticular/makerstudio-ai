@@ -17,7 +17,7 @@ import { ProjectsPage } from "./pages/Projects";
 import { SettingsPage } from "./pages/Settings";
 import { DevicePage } from "./pages/Device";
 import { PartsPage } from "./pages/Parts";
-import { useUi } from "./state";
+import { useProject, useUi } from "./state";
 import { WORKSPACES, workspaceInfo } from "./workspaces";
 
 const menuActions: Record<string, () => unknown> = {
@@ -46,6 +46,10 @@ function shortcutAction(e: KeyboardEvent): string | null {
 
 export function App() {
   const workspace = useUi((s) => s.workspace);
+  // Opening another project starts every studio fresh (no simulation, flight or panel of the old one).
+  const loads = useProject((s) => s.loads);
+  const theme = useUi((s) => s.settings?.theme ?? "nova");
+  useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
   const dialogOpen = useUi((s) => s.dialog !== null);
   useWindowSync();
 
@@ -129,7 +133,7 @@ export function App() {
       <div className="body">
         <Sidebar />
         <main className="workspace" data-testid={`workspace-${workspace}`}>
-          <WorkspaceErrorBoundary resetKey={workspace} onBack={() => useUi.getState().setWorkspace("home")}>{page}</WorkspaceErrorBoundary>
+          <WorkspaceErrorBoundary key={loads} resetKey={workspace} onBack={() => useUi.getState().setWorkspace("home")}>{page}</WorkspaceErrorBoundary>
         </main>
         <AiPanel />
       </div>

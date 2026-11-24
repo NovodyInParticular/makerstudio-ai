@@ -26,6 +26,8 @@ export interface PracticeProject {
   localPath?: string;
   /** Model files on this computer loaded into 3D Studio when the project starts (keys of LOCAL_MODELS). */
   localModels?: string[];
+  /** The project's print files on GitHub, downloaded into 3D Studio when it starts (keys of REMOTE_MODELS). */
+  remoteModels?: string[];
   /** Where the facts came from, when not simply the GitHub page. */
   factsSource?: string;
   license: string;
@@ -157,6 +159,7 @@ const ROBOTS: PracticeProject[] = [
     id: "sesame",
     title: "Sesame mini quadruped",
     repo: "dorianborian/sesame-robot",
+    remoteModels: ["sesame"],
     license: "Apache-2.0",
     difficulty: "Intermediate",
     kind: "Walking robot (4 legs)",
@@ -173,7 +176,7 @@ const ROBOTS: PracticeProject[] = [
     caveats: ["Needs basic soldering. Small servo parts: print a test piece first and check the servo fit."],
     steps: [
       "Read hardware/bom/README.md and order the parts.",
-      "Download the STL files from the repo (hardware/printing) and import them here (Files → Import STL / OBJ / STEP).",
+      "The printed parts from the repo (hardware/printing: frame, covers and the eight leg pieces) are laid out in 3D Studio next to the starter shapes; they are downloaded the first time you start the project.",
       "Run Check for printing and Orient on each part, then send them to Bambu Studio.",
       "Flash the firmware with the Arduino IDE, centre the servos, then assemble.",
       "Connect over Wi-Fi and try the walking moves.",
@@ -197,6 +200,7 @@ const ROBOTS: PracticeProject[] = [
     id: "stack-chan",
     title: "Stack-chan desk robot (M5Stack)",
     repo: "stack-chan/stack-chan",
+    remoteModels: ["stack-chan"],
     license: "Apache-2.0",
     difficulty: "Intermediate",
     kind: "Desk robot with a screen face",
@@ -211,7 +215,7 @@ const ROBOTS: PracticeProject[] = [
     caveats: ["Check the case guide for which servos and board your version needs before ordering parts."],
     steps: [
       "Read case/README.md and the firmware guide; pick your M5Stack model.",
-      "Download the case files and import them here; run Check for printing and Orient.",
+      "The SG90-servo case from the repo (shell, feet and the two brackets) is laid out in 3D Studio; run Check for printing and Orient.",
       "Print and assemble, flash the firmware, then make a face in the face editor.",
       "Write your first MOD (or use the block editor) to make it react.",
     ],
@@ -237,6 +241,7 @@ const ROBOTS: PracticeProject[] = [
     id: "openbot",
     title: "OpenBot (smartphone-brained robot car)",
     repo: "ob-f/OpenBot",
+    remoteModels: ["openbot"],
     license: "MIT",
     difficulty: "Intermediate",
     kind: "Driving robot",
@@ -251,7 +256,7 @@ const ROBOTS: PracticeProject[] = [
     caveats: ["Needs an Android phone to use as the brain."],
     steps: [
       "Read the Robot Body build guide in the repo and choose a body version.",
-      "Print or build the body; import any print files here to check and orient them.",
+      "The DIY body (top and bottom) and the phone mount from the repo are laid out in 3D Studio: check and orient them, then print or build the body.",
       "Flash the Arduino firmware, then install the OpenBot app on the phone.",
       "Drive it manually, then try the autonomous modes.",
     ],
@@ -297,6 +302,7 @@ const ROBOTS: PracticeProject[] = [
     id: "so-arm",
     title: "SO-101 / SO-100 robot arm (LeRobot)",
     repo: "TheRobotStudio/SO-ARM100",
+    remoteModels: ["so-arm"],
     license: "Apache-2.0",
     difficulty: "Intermediate",
     kind: "Robot arm",
@@ -313,7 +319,7 @@ const ROBOTS: PracticeProject[] = [
     caveats: ["Use the SO-101 files (SO-100 is deprecated). Print the gauge files first to check your printer's accuracy."],
     steps: [
       "Read the SO-101 section of the repo and order the servos and boards.",
-      "Download the STEP files and import them here (STEP keeps exact shapes), or the STL plates.",
+      "The SO-101 parts (the repo's STL/SO101/Individual files, leader and follower) are laid out in 3D Studio; the repo's STEP files keep exact shapes if you need them.",
       "Check for printing and Orient each part; send them to Bambu Studio.",
       "Configure the servo IDs with LeRobot, assemble, calibrate.",
       "Teleoperate the follower with the leader arm, then record and train.",
@@ -332,6 +338,7 @@ const ROBOTS: PracticeProject[] = [
     id: "moveo",
     title: "BCN3D Moveo printed robot arm",
     repo: "BCN3D/BCN3D-Moveo",
+    remoteModels: ["moveo"],
     license: "MIT",
     difficulty: "Advanced",
     kind: "Robot arm",
@@ -345,7 +352,7 @@ const ROBOTS: PracticeProject[] = [
     caveats: ["Last updated in 2022. Larger parts may need splitting or careful orientation for the A1's bed: run Check for printing on each."],
     steps: [
       "Read the BOM and the assembly manual.",
-      "Import the STL files here; run Check for printing and Orient, and note any part that does not fit.",
+      "All the STL files from the repo are laid out in 3D Studio; run Check for printing and Orient, and note any part that does not fit.",
       "Print, assemble, and flash the firmware following the manuals.",
     ],
     exercises: ["Import one large part and use Check for printing to see if it fits the A1; if not, cut it in two with a hole box."],
@@ -355,6 +362,7 @@ const ROBOTS: PracticeProject[] = [
     id: "spotmicro",
     title: "Spot Micro quadruped (ROS)",
     repo: "mike4192/spotMicro",
+    remoteModels: ["spotmicro"],
     license: "MIT",
     difficulty: "Advanced",
     kind: "Walking robot (4 legs)",
@@ -369,7 +377,7 @@ const ROBOTS: PracticeProject[] = [
     caveats: ["The software targets ROS Kinetic / Ubuntu 16.04, which are long out of support; the page says it may not build elsewhere. Expect porting work."],
     steps: [
       "Read the repo README fully, including the hardware and software setup notes.",
-      "Get the frame files from Thingiverse; import and check them here.",
+      "The repo's 3D models of the frame are laid out in 3D Studio to look at and measure; print from the Thingiverse frame files (import and check them here).",
       "Set up the Pi (the README's swap and ROS steps), wire the PCA9685 and servos, calibrate.",
     ],
     exercises: ["Design a mount for a PCA9685 board (measure your board's hole spacing)."],
@@ -385,6 +393,7 @@ const ROBOTS: PracticeProject[] = [
     id: "sawppy",
     title: "Sawppy the Mars rover",
     repo: "Roger-random/Sawppy_Rover",
+    remoteModels: ["sawppy"],
     license: "MIT",
     difficulty: "Advanced",
     kind: "Rover (6 wheels)",
@@ -399,7 +408,7 @@ const ROBOTS: PracticeProject[] = [
     caveats: ["A big build aimed at adult hobbyists and older students; a smaller Micro Sawppy is in development."],
     steps: [
       "Read the build docs and the price breakdown linked from the repo.",
-      "Import the STL parts here; check and orient them.",
+      "The STL parts from the repo are laid out in 3D Studio; check and orient them.",
       "Cut the extrusions, print, assemble the suspension, then wire the servos.",
     ],
     exercises: ["Design a rover wheel: a cylinder with a hub hole and grooves made from thin hole boxes."],
@@ -415,6 +424,7 @@ const ROBOTS: PracticeProject[] = [
     id: "jpl-rover",
     title: "NASA JPL Open Source Rover",
     repo: "nasa-jpl/open-source-rover",
+    remoteModels: ["jpl-rover"],
     license: "Apache-2.0",
     difficulty: "Advanced",
     kind: "Rover (6 wheels)",
@@ -432,6 +442,7 @@ const ROBOTS: PracticeProject[] = [
       "Read the build guide and parts list; budget the parts.",
       "Assemble the chassis and suspension, then the electronics.",
       "Install the rover software on the Pi and drive it.",
+      "The printable camera mast (backplate and head, from the repo's expansion/mast) is laid out in 3D Studio.",
       "Design custom add-ons here (exercise below).",
     ],
     exercises: ["Design a printed sensor or camera mast mount for the rover's top deck."],
@@ -485,6 +496,7 @@ const DUMMY13: PracticeProject[] = [
     id: "dummy13-pla",
     title: "Dummy 13 PLA print solution",
     repo: "flight-commander/dummy_13",
+    remoteModels: ["dummy13-pla"],
     license: "CC-BY-4.0",
     factsSource: "license as stated in the repo's README (no license file)",
     difficulty: "Starter",
@@ -500,7 +512,7 @@ const DUMMY13: PracticeProject[] = [
     caveats: ["The repo has no license file; its README states a Creative Commons 4.0 Attribution license."],
     steps: [
       "Read the README and watch the linked video.",
-      "Download the ZIP files and import the frame parts here; run Check for printing.",
+      "The frame, armour and extra parts from the repo's ZIP files (and the alternative right hands) are laid out in 3D Studio; run Check for printing.",
       "Copy the layer, infill and perimeter settings into Bambu Studio, then print.",
     ],
     exercises: ["Print the fit-test plate: compare 0.1, 0.2 and 0.3 mm clearance in your PLA."],
@@ -824,6 +836,7 @@ const DRONES: PracticeProject[] = [
     id: "flix",
     title: "Flix: an ESP32 quadcopter made from scratch",
     repo: "okalachev/flix",
+    remoteModels: ["flix"],
     license: "unspecified",
     factsSource: DRONE_CHECKED,
     difficulty: "Intermediate",
@@ -846,7 +859,7 @@ const DRONES: PracticeProject[] = [
     ],
     steps: [
       "Read the assembly and usage guides in the repo's docs folder, and buy the parts from its component table.",
-      "Print the frame and ESP32 holder from the repo's STL files (100% infill as recommended).",
+      "The frame (v1.1), ESP32 holder and M3 washer from the repo are laid out in 3D Studio beside the practice frame; print them with 100% infill as recommended.",
       "Try the Gazebo simulator first to learn the controls without risking the drone.",
       "Solder the MOSFETs, motors and IMU, and check every connection with a multimeter before connecting the battery.",
       "Upload the firmware (Arduino), calibrate the IMU, and test the motors WITHOUT propellers.",
@@ -971,6 +984,7 @@ export function practiceNotes(p: PracticeProject): string {
     "",
     "## Practice in 3D Studio",
     "The starter shapes are simple practice exercises with placeholder sizes, not the project's parts. Measure your real parts with calipers and change the sizes.",
+    ...(p.remoteModels?.length || p.localModels?.length ? ["The project's own parts are laid out next to them in 3D Studio."] : []),
     ...p.exercises.map((e) => `- [ ] ${e}`),
     "",
     "## My notes",

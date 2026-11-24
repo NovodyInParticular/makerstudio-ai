@@ -2,6 +2,7 @@
 // screens showing their live faces.
 
 import { Line, OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import { useSceneColors } from "../theme";
 import { Canvas, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo } from "react";
 import { BufferAttribute, BufferGeometry, DataTexture, Matrix4, NearestFilter, Object3D, RGBAFormat, SRGBColorSpace, Vector3 } from "three";
@@ -137,9 +138,10 @@ export function RobotView({ objects, robot, deltas, screens, faceState, selected
   onMiss(): void;
 }) {
   const parts = objects.filter((o) => o.parentId === null && o.visible && !o.hole);
+  const sceneColors = useSceneColors();
   return (
     <Canvas dpr={[1, 2]} gl={{ antialias: true, preserveDrawingBuffer: true }} onPointerMissed={onMiss} style={{ cursor: pickMode ? "crosshair" : "default" }} data-testid="robot-canvas">
-      <color attach="background" args={["#101316"]} />
+      <color attach="background" args={[sceneColors.background]} />
       <PerspectiveCamera makeDefault position={[160, -220, 170]} fov={40} near={0.5} far={20000} />
       <OrbitControls makeDefault enableDamping={false} target={[0, 0, 40]} />
       <hemisphereLight args={["#dfe9f3", "#1b2026", 0.8]} />

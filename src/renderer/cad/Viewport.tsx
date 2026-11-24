@@ -1,5 +1,8 @@
 // The 3D viewport: bed, grid, shapes, selection, transform gizmo and camera.
 
+import { LayerSlider, ToolpathPreview } from "../print/ToolpathPreview";
+import { useSlice } from "../print/slicing";
+import { useSceneColors } from "../theme";
 import { GizmoHelper, GizmoViewport, Grid, Html, Line, OrbitControls, OrthographicCamera, PerspectiveCamera, TransformControls } from "@react-three/drei";
 import { Canvas, useThree, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
@@ -19,6 +22,7 @@ Object3D.DEFAULT_UP.set(0, 0, 1);
 
 const DEG = Math.PI / 180;
 const HOME = new Vector3(170, -230, 170);
+const HOME_ZOOM = 2.2;
 
 /** Shared between the canvas and the drop handler outside it. */
 const bridge: { camera: Camera | null; controls: { target: Vector3; update(): void } | null; objects: Map<string, Object3D>; lastGizmoUse: number } = {
@@ -333,24 +337,25 @@ function WorkplaneMarker() {
 
 export function Bed() {
   const printer = useUi((s) => s.settings?.printer);
+  const colors = useSceneColors();
   const x = (printer?.bedX ?? 256) / 2, y = (printer?.bedY ?? 256) / 2;
   return (
     <group>
       <mesh position={[0, 0, -0.05]}>
         <planeGeometry args={[x * 2, y * 2]} />
-        <meshStandardMaterial color="#15191d" roughness={0.9} />
+        <meshStandardMaterial color={colors.bed} roughness={0.9} />
       </mesh>
-      <Line points={[[-x, -y, 0.02], [x, -y, 0.02], [x, y, 0.02], [-x, y, 0.02], [-x, -y, 0.02]]} color="#2fd6a3" lineWidth={1.5} transparent opacity={0.7} />
+      <Line points={[[-x, -y, 0.02], [x, -y, 0.02], [x, y, 0.02], [-x, y, 0.02], [-x, -y, 0.02]]} color={colors.bedEdge} lineWidth={1.5} transparent opacity={0.8} />
       <Grid
         rotation={[Math.PI / 2, 0, 0]}
         position={[0, 0, 0.01]}
         args={[x * 2, y * 2]}
         cellSize={10}
         cellThickness={0.6}
-        cellColor="#2a3138"
+        cellColor={colors.cell}
         sectionSize={50}
         sectionThickness={1}
-        sectionColor="#38515a"
+        sectionColor={colors.section}
         fadeDistance={2000}
         infiniteGrid
         followCamera={false}
@@ -422,8 +427,13 @@ function Gizmo() {
   );
 }
 
+/** Where the last view request pointed the camera, in whole mm (read by the end-to-end tests). */
+function showTarget(canvas: HTMLCanvasElement, target: Vector3) {
+  canvas.dataset.viewTarget = target.toArray().map((v) => Math.round(v)).join(",");
+}
+
 function CameraRig() {
-  const { camera, controls, size } = useThree();
+  const { camera, controls, size, gl } = useThree();
   const request = useCad((s) => s.viewRequest);
   const mode = useCad((s) => s.camera);
   const previous = useRef<{ camera: Camera; mode: string } | null>(null);
@@ -456,14 +466,46 @@ function CameraRig() {
     previous.current = { camera, mode };
   }, [camera, mode, size.height]);
 
+  // The request this view last carried out, and on which controls (they are replaced once when
+  // the view opens and swaps in its own camera; the request is then applied to the new ones too).
+  const applied = useRef<{ n: number; controls: unknown } | null>(null);
   useEffect(() => {
+    // A request made while 3D Studio was closed (a practice project loading its parts, another
+    // project opened) waits until the view and its controls exist. A view that opens shows the
+    // last view asked for. (The old view may have carried it out just before it closed: the 3D
+    // scene is drawn by its own renderer, which can update before the page around it does.)
     if (!request || !bridge.controls) return;
+    if (applied.current?.n === request.n && applied.current.controls === controls) return;
+    applied.current = { n: request.n, controls };
     const controlsRef = bridge.controls;
     const all = currentObjects();
-    const box = all.length ? worldBounds(all.filter((o) => o.parentId === null).map((o) => o.id), all) : new Box3(new Vector3(-60, -60, 0), new Vector3(60, 60, 40));
+    // While the sliced layers replace the model, the view fits the layers (the slicer may have
+    // arranged the parts somewhere else on the plate).
+    const slice = useSlice.getState();
+    const layers = slice.open && slice.previewOn ? slice.preview?.bounds ?? null : null;
+    const [cx, cy] = slice.outcome?.bedCentre ?? [128, 128];
+    if (request.preset === "home" && all.length === 0 && !layers) {
+      // Nothing to look at: the starting view of the empty bed.
+      controlsRef.target.set(0, 0, 0);
+      camera.position.copy(HOME);
+      if (camera instanceof OrthoCam) {
+        camera.zoom = HOME_ZOOM;
+        camera.updateProjectionMatrix();
+      }
+      controlsRef.update();
+      showTarget(gl.domElement, controlsRef.target);
+      return;
+    }
+    const box = layers
+      ? new Box3(new Vector3(layers[0] - cx, layers[1] - cy, layers[2]), new Vector3(layers[3] - cx, layers[4] - cy, layers[5]))
+      : all.length ? worldBounds(all.filter((o) => o.parentId === null).map((o) => o.id), all) : new Box3(new Vector3(-60, -60, 0), new Vector3(60, 60, 40));
     const centre = box.isEmpty() ? new Vector3() : box.getCenter(new Vector3());
     const radius = box.isEmpty() ? 80 : Math.max(20, box.getSize(new Vector3()).length() / 2);
-    const distance = radius / Math.sin(MathUtils.degToRad(45) / 2) * 1.1;
+    // Fit the bounding sphere in the narrower of the two view angles (a tall, narrow view is
+    // narrower across than up and down).
+    const halfHeight = MathUtils.degToRad(45) / 2;
+    const halfWidth = Math.atan(Math.tan(halfHeight) * (size.width / Math.max(1, size.height)));
+    const distance = radius / Math.sin(Math.min(halfHeight, halfWidth)) * 1.1;
     const directions: Record<string, Vector3> = {
       home: HOME.clone().normalize(),
       fit: camera.position.clone().sub(controlsRef.target).normalize(),
@@ -471,7 +513,7 @@ function CameraRig() {
       front: new Vector3(0, -1, 0),
       right: new Vector3(1, 0, 0),
     };
-    const target = request.preset === "home" && all.length === 0 ? new Vector3() : centre;
+    const target = request.preset === "home" && all.length === 0 && !layers ? new Vector3() : centre;
     controlsRef.target.copy(target);
     camera.position.copy(target).add(directions[request.preset]!.multiplyScalar(distance));
     if (camera instanceof OrthoCam) {
@@ -479,7 +521,8 @@ function CameraRig() {
       camera.updateProjectionMatrix();
     }
     controlsRef.update();
-  }, [request]); // eslint-disable-line react-hooks/exhaustive-deps
+    showTarget(gl.domElement, controlsRef.target);
+  }, [request, controls]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
 }
@@ -492,6 +535,18 @@ export function Viewport() {
   const tool = useCad((s) => s.tool);
   const csgReady = useCad((s) => s.csgReady);
   const workplane = useCad((s) => s.workplane);
+  // While the Print panel shows the sliced layers, they replace the model in the view.
+  const layersOn = useSlice((s) => s.open && s.previewOn && s.preview !== null);
+  // When the view swaps between the model and the sliced layers (or another plate's layers),
+  // fit what is shown now. Opening 3D Studio keeps the view it was given.
+  const shown = useSlice((s) => (s.open && s.previewOn ? s.preview : null));
+  const lastShown = useRef<typeof shown | undefined>(undefined);
+  useEffect(() => {
+    const before = lastShown.current;
+    lastShown.current = shown;
+    if (before !== undefined && before !== shown) useCad.getState().requestView("fit");
+  }, [shown]);
+  const sceneColors = useSceneColors();
   // One list: holes are transparent, and three.js draws transparent objects after solid ones.
   // (Separate lists rebuilt a shape whenever it was switched between hole and solid.)
   const roots = objects.filter((o) => o.parentId === null);
@@ -541,7 +596,8 @@ export function Viewport() {
       onDragOver={(e) => { if (e.dataTransfer.types.includes("application/x-makerstudio-shape") || e.dataTransfer.types.includes("Files")) e.preventDefault(); }}
       onDrop={onDrop}
     >
-      {(tool !== "select" || !csgReady || workplane) && (
+      {layersOn && <LayerSlider />}
+      {!layersOn && (tool !== "select" || !csgReady || workplane) && (
         <div className="viewport-hint" data-testid="viewport-hint">
           {!csgReady && <span>Loading the solid geometry engine…</span>}
           {tool === "measure" && <span>Measure: click two points on shapes or the bed. Esc to stop.</span>}
@@ -559,21 +615,27 @@ export function Viewport() {
           if (!e.shiftKey && !e.ctrlKey) useCad.getState().select([]);
         }}
       >
-        <color attach="background" args={["#101316"]} />
+        <color attach="background" args={[sceneColors.background]} />
         <PerspectiveCamera makeDefault={cameraMode === "perspective"} position={HOME.toArray()} fov={45} near={0.5} far={20000} />
-        <OrthographicCamera makeDefault={cameraMode === "orthographic"} position={HOME.toArray()} zoom={2.2} near={-20000} far={20000} />
+        <OrthographicCamera makeDefault={cameraMode === "orthographic"} position={HOME.toArray()} zoom={HOME_ZOOM} near={-20000} far={20000} />
         <OrbitControls makeDefault enableDamping={false} target={[0, 0, 0]} maxDistance={6000} />
         <CameraRig />
         <hemisphereLight args={["#dfe9f3", "#1b2026", 0.75]} />
         <directionalLight position={[120, -160, 260]} intensity={1.6} />
         <directionalLight position={[-150, 120, 80]} intensity={0.35} />
         <Bed />
-        {roots.map((o) => <SceneNode key={o.id} object={o} all={objects} selection={selected} />)}
-        <Gizmo />
-        <PickPlane />
-        <MeasureOverlay />
-        <WorkplaneMarker />
-        <PrintIssueOverlay />
+        {layersOn ? (
+          <ToolpathPreview />
+        ) : (
+          <>
+            {roots.map((o) => <SceneNode key={o.id} object={o} all={objects} selection={selected} />)}
+            <Gizmo />
+            <PickPlane />
+            <MeasureOverlay />
+            <WorkplaneMarker />
+            <PrintIssueOverlay />
+          </>
+        )}
         <GizmoHelper alignment="bottom-left" margin={[64, 64]}>
           <GizmoViewport axisColors={["#ff6b6b", "#2fd6a3", "#5aa9e6"]} labelColor="#0b0e10" />
         </GizmoHelper>

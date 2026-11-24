@@ -247,6 +247,23 @@ Owner chose the desk-robot track first (see ROADMAP), aiming at a Stack-chan sty
 - Tested end-to-end with the official MCP client against the dev and the packaged app: settings show the server and command; no token / wrong token → 401, browser origin → 403; list tools; read the project; a change in Assist mode is refused; in Create mode it becomes a proposal in the panel without changing the project; Approve adds the box in 3D Studio; Ctrl+Z removes it; a rejected proposal leaves the notes unchanged.
 - **Owner to do**: turn it on in Settings, run the command once, then ask Claude Code about the open project.
 
+### Print panel (2026-11-23): slice with Bambu Studio, print from the SD card
+- `src/main/bambuSlice.ts` runs Bambu Studio's command-line slicer (`--slice 0 --arrange 1 --orient 0`) with flattened system profiles (`src/main/bambuProfiles.ts`: the CLI does not follow `inherits`, which left filament weight at 0 g and keys missing). Overrides: `curr_bed_type` (default Textured PEI; the CLI otherwise uses Cool Plate temperatures), `enable_support`/`support_type`, `sparse_infill_density`. Only presets from the catalog for the Settings printer are accepted.
+- More than one plate: the first run's `result.json` says which STL is on which plate; each plate is sliced again on its own, one `.gcode.3mf` per plate.
+- After slicing, `finishSlicedFile` writes `printer_model_id` (A1 = N2S, from the machine model profile) into `Metadata/slice_info.config` and adds `Metadata/plate_1.png` / `plate_1_small.png` drawn in the renderer (`src/renderer/print/thumbnail.ts`); the CLI cannot draw them without OSMesa.
+- Preview: `src/core/print/gcode.ts` parses the G-code (features from `; FEATURE:`, layers from `; CHANGE_LAYER`, arcs split into segments, start/end machine code left out) in a worker; `ToolpathPreview` draws one line set per feature with draw ranges.
+- SD card: `src/main/drives.ts` (`lsblk -J` / PowerShell CIM), copy with fsync and a unique name, eject with `udisksctl unmount` + `power-off`. Tests use `MAKERSTUDIO_SD_ROOT` as a stand-in card.
+- Tested: unit (`tests/unit/gcode.test.ts`, `tests/unit/slicing.test.ts`), live with the real slicer (`tests/live/slice.live.test.ts`: one part, options, two plates, too big), end-to-end (`tests/e2e/slicing.spec.ts`, skipped without Bambu Studio).
+- Open this print in Bambu Studio (`print:openInBambu`): checked on 2026-11-23 with Bambu Studio 02.09.01.70 on a hidden display, with a copy of the owner's Bambu Studio settings: a MakerStudio .gcode.3mf opens as a project with the A1, Textured PEI plate, PLA Basic, 0.20mm Standard and the slicer's part positions; Print plate is enabled after Slice plate. Sending over Bambu Cloud was not tried (needs the owner's login and a bound printer).
+- Not verified yet: printing a copied file on the real A1 (thumbnail on the printer screen, model id check), a real USB card reader and eject, Windows drive listing.
+- The printer-screen steps in step 4 are general (Bambu's wiki could not be read automatically); adjust them once the owner has printed from the card.
+
+### Nova look (2026-11-23)
+- `settings.theme` ("nova" default, "classic"); `App` sets `<html data-theme>`. `src/renderer/theme-nova.css` holds every Nova rule, scoped to `:root[data-theme="nova"]`; `styles.css` stays the Classic look plus shared pieces (home studio cards, mascot, look picker, confetti canvas).
+- Owner feedback (2026-11-23): no rainbow, and the bright neon cyan-on-navy was hard on the eyes. Owner picked "soft slate + teal": background #1e242b, panels #262d35, text #dfe4e8, accent #5fb8a8, no glows, gradients or dotted backdrop. Only warning/error/success colours and the slicer's feature colours differ.
+- 3D scene colours come from `src/renderer/theme.ts` (`useSceneColors`). Fonts: `@fontsource-variable/lexend` and `@fontsource-variable/fredoka` (OFL-1.1), CSP `font-src 'self' data:`.
+- `tests/e2e/look-tour.spec.ts` takes design screenshots (skipped unless `SHOTS` is set; `THEME=classic` for Classic).
+
 ## What worked at the end of Phase 2
 
 - Desktop app (Electron 45, React 19, TypeScript) with the dark emerald/teal theme.

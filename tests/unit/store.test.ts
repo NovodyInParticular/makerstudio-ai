@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { renameProject, setNotes } from "../../src/core/document/commands";
 import { createProjectStore, MERGE_WINDOW_MS } from "../../src/core/document/store";
+import { createEmptyProject } from "../../src/shared/format";
 
 const fresh = () => createProjectStore(undefined, "test");
 
@@ -14,6 +15,20 @@ describe("project store", () => {
     expect(store.getState().project.document.name).toBe("Untitled project");
     store.getState().redo();
     expect(store.getState().project.document.name).toBe("Rover");
+  });
+
+  it("counts project loads, but not edits, undo or redo", () => {
+    const store = fresh();
+    expect(store.getState().loads).toBe(0);
+    store.getState().execute(renameProject({ name: "Rover" }));
+    store.getState().undo();
+    store.getState().redo();
+    expect(store.getState().loads).toBe(0);
+    store.getState().load(createEmptyProject("Other", "test"), null);
+    expect(store.getState().loads).toBe(1);
+    expect(store.getState().project.document.name).toBe("Other");
+    store.getState().load(createEmptyProject("Third", "test"), "/tmp/third.msproj");
+    expect(store.getState().loads).toBe(2);
   });
 
   it("a new change clears the redo stack", () => {

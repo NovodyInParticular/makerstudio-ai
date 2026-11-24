@@ -13,6 +13,8 @@ import { Inspector } from "./Inspector";
 import { ScriptPanel } from "./ScriptPanel";
 import { openScript, useScript } from "./scriptParts";
 import { Viewport } from "./Viewport";
+import { PrintPanel as PrintSidePanel } from "../print/PrintPanel";
+import { openPrintPanel, useSlice } from "../print/slicing";
 
 // Small original pictograms for the shape palette.
 const SHAPE_ICONS: Record<PrimitiveKind, string> = {
@@ -87,6 +89,9 @@ function PrintPanel() {
   return (
     <section className="cad-section" data-testid="print-panel">
       <h4>Print <span className="muted">({check?.report.printer.name ?? "printer from Settings"})</span></h4>
+      <button className="btn primary pp-open" onClick={openPrintPanel} title={`Slice ${scope} and put them on the printer's SD card`} data-testid="print-open">
+        Print it!
+      </button>
       <div className="file-actions">
         <button className="btn plain small" onClick={runPrintCheck} title={`Check ${scope} for printing: size, bed, overhangs, thin walls`} data-testid="print-check">Check for printing</button>
         <button className="btn plain small" onClick={orientForPrinting} title={`Turn ${scope} to the position with the least overhang and the most on the bed (undoable)`} data-testid="print-orient">Orient</button>
@@ -197,7 +202,7 @@ function Toolbar() {
       </div>
       <div className="seg">
         {views.map(([preset, label]) => (
-          <button key={preset} onClick={() => cad.requestView(preset)} title={preset === "fit" ? "Fit all objects (F)" : `${label} view`}>{label}</button>
+          <button key={preset} onClick={() => cad.requestView(preset)} title={preset === "fit" ? "Fit everything in the view (F)" : `${label} view`} data-testid={`view-${preset}`}>{label}</button>
         ))}
       </div>
       <div className="seg">
@@ -214,6 +219,7 @@ function Toolbar() {
 
 export function CadWorkspace() {
   const scriptOpen = useScript((s) => s.path !== null);
+  const printOpen = useSlice((s) => s.open);
   return (
     <div className="cad-workspace">
       <div className="cad-left">
@@ -226,7 +232,7 @@ export function CadWorkspace() {
         <Toolbar />
         <Viewport />
       </div>
-      {scriptOpen ? <ScriptPanel /> : <Inspector />}
+      {printOpen ? <PrintSidePanel /> : scriptOpen ? <ScriptPanel /> : <Inspector />}
     </div>
   );
 }

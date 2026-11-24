@@ -31,6 +31,8 @@ export interface ProjectState {
   savedVersion: number;
   undoStack: UndoStep[];
   redoStack: UndoStep[];
+  /** Increases each time another project is loaded (new / open / practice / duplicate). */
+  loads: number;
 }
 
 export interface ProjectActions {
@@ -100,6 +102,7 @@ export function createProjectStore(initial?: Project, appVersion = "0.0.0") {
   return createStore<ProjectState & ProjectActions>()((set, get) => ({
     project: initial ?? createEmptyProject("Untitled project", appVersion),
     filePath: null,
+    loads: 0,
     version: 0,
     savedVersion: 0,
     undoStack: [],
@@ -179,7 +182,7 @@ export function createProjectStore(initial?: Project, appVersion = "0.0.0") {
 
     load(project, filePath) {
       registerMeshAssets(project.assets);
-      set({ project, filePath, version: 0, savedVersion: 0, undoStack: [], redoStack: [] });
+      set({ project, filePath, version: 0, savedVersion: 0, undoStack: [], redoStack: [], loads: get().loads + 1 });
     },
 
     snapshotForSave(now = new Date()) {
