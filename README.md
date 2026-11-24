@@ -2,7 +2,7 @@
 
 Your AI-powered engineering and robotics workshop. Desktop app for Windows and Linux.
 
-Current state: **Phase 3b (3D Studio basics)**. Linux first; Windows testing later. See `BUILD_STATUS.md` for what works and `ROADMAP.md` for what comes next.
+Current version: **0.3.0**: 3D Studio with slicing and printing (Bambu Studio slicer), Circuit Studio with Uno / Pico code simulation, Display, Robotics and Drone Studios, a parts library, practice projects and an AI assistant. Built and tested on Linux; the Windows installer is not yet tested on a real Windows PC. See `CHANGELOG.md` for what changed and `BUILD_STATUS.md` for what works.
 
 ## Run it
 

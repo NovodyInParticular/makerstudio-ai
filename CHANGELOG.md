@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-24 — Version 0.3.0
+Everything below down to "Opening another project starts fresh" plus the practice-project parts:
+- **Print it!**: slice with Bambu Studio's slicer, layer preview, copy to an SD card, or open the sliced print in Bambu Studio to send it over the internet.
+- **Nova**, the new calm default look (Classic is in Settings → Look).
+- **Practice projects load their real parts**: projects with print files on GitHub (Sesame, Stack-chan case, OpenBot, SO-101 arm, Moveo arm, Spot Micro, Sawppy, the rover mast, Flix, Dummy 13 PLA files) download them into 3D Studio when started, laid out next to the starter shapes. Each file is pinned to one version of its repo and checked before use; after the first download they come from a cache and work offline.
+- Opening another project starts fresh (view, selection, print, simulation, AI proposals).
+
 ## 2026-11-23 — Opening another project starts fresh
 - **3D view**: opening a project now shows its parts (the camera is centred on them from the usual angle); a new project shows the empty bed. Before, the camera stayed where it was and big imported figures could be off screen.
 - Nothing from the old project is left behind: the selection, measuring points, workplane and print check are cleared; the Print panel stays open but the old sliced print, its layers and the "copy to card" button go (a slice still running is stopped); the circuit simulation and running Uno / Pico code stop; the script panel closes; a script part that finishes building after the switch is not added to the new project.
